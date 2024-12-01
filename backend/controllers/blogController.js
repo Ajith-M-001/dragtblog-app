@@ -269,3 +269,62 @@ export const getBlogs = async (req, res, next) => {
     next(error);
   }
 };
+
+export const searchBlogs = async (req, res, next) => {
+  try {
+    const { query: searchQuery, order, maxLimit = 5, page = 1 } = req.query;
+    const query = { status: "published" };
+    const sortDirection = order === "asc" ? 1 : -1;
+    const skip = (page - 1) * maxLimit;
+
+    if (searchQuery) {
+      query.$or = [
+        { title: { $regex: searchQuery, $options: "i" } },
+        { metaDescription: { $regex: searchQuery, $options: "i" } },
+        { content: { $regex: searchQuery, $options: "i" } },
+        { categories: { $regex: searchQuery, $options: "i" } },
+        { tags: { $regex: searchQuery, $options: "i" } },
+      ];
+    }
+
+    const [blogs, totalBlogs, categories, tags] = await Promise.all([
+      Blog.find(query)
+        .sort({ createdAt: sortDirection })
+        .skip(skip)
+        .limit(maxLimit)
+        .select(
+          "title slug banner categories createdAt metaDescription blogActivity"
+        )
+        .populate("author", "profilePicture fullName username"),
+      Blog.countDocuments(query),
+      Category.find({
+        category: { $regex: searchQuery, $options: "i" },
+      }).select("category"),
+      Tag.find({ tag: { $regex: searchQuery, $options: "i" } }).select("tag"),
+    ]);
+
+    const totalPages = Math.ceil(totalBlogs / maxLimit);
+    const hasNextPage = page < totalPages;
+
+    const nextPage = hasNextPage ? page + 1 : null;
+
+    const pagination = {
+      currentPage: page,
+      totalPages,
+      totalBlogs,
+      hasNextPage,
+      nextPage,
+    };
+
+    res
+      .status(200)
+      .json(
+        ApiResponse.success(
+          { blogs, categories, tags, totalBlogs, pagination },
+          "Blogs fetched successfully"
+        )
+      );
+  } catch (error) {
+    next(error);
+  }
+};

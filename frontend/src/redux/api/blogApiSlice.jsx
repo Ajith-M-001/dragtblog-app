@@ -60,10 +60,10 @@ const blogApiSlice = apiSlice.injectEndpoints({
       providesTags: ["Blog"],
     }),
     getSearchResults: builder.query({
-      query: (query) => ({
-        url: `${BLOG_URL}/getBlogs`,
+      query: ({ query, maxLimit, page }) => ({
+        url: `${BLOG_URL}/search-blogs`,
         method: "GET",
-        params: { query },
+        params: { query, maxLimit, page },
       }),
       providesTags: ["Blog"],
     }),

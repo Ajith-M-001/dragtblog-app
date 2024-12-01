@@ -30,6 +30,11 @@ const ProfilePage = () => {
   console.log(data);
 
   useEffect(() => {
+    setBlogs([]);
+    setPage(1);
+  }, [username]);
+
+  useEffect(() => {
     if (data) {
       setBlogs((prevBlogs) => {
         const newBlogs = data.data.blogs.filter(
@@ -44,7 +49,7 @@ const ProfilePage = () => {
   const handleScroll = () => {
     if (
       window.innerHeight + document.documentElement.scrollTop >=
-        document.documentElement.offsetHeight - 50 &&
+        document.documentElement.offsetHeight - 100 &&
       hasMore
     ) {
       setPage((prevPage) => prevPage + 1);
@@ -129,7 +134,7 @@ const ProfilePage = () => {
                     display: "flex",
                     justifyContent: "space-between",
                     alignItems: "center",
-                    width: "40%",
+                    width: "50%",
                     mx: "auto",
                   }}
                 >

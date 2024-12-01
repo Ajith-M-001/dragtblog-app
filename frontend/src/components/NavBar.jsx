@@ -74,8 +74,10 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
   const { isAuthenticated } = useSelector((state) => state.user);
   const [searchQuery, setSearchQuery] = useState("");
   const handleSearch = () => {
-    navigate(`/search?query=${searchQuery}`);
-    setSearchQuery("");
+    if (searchQuery) {
+      navigate(`/search?query=${searchQuery}`);
+      setSearchQuery("");
+    }
   };
 
   // console.log(theme);

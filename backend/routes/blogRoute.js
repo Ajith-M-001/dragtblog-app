@@ -7,6 +7,7 @@ import {
   getTrendingBlogs,
   getUniqueCategories,
   getBlogs,
+  searchBlogs,
 } from "../controllers/blogController.js";
 import { isAuthenticated } from "../utils/verifyToken.js";
 
@@ -19,5 +20,6 @@ router.get("/get-latest-blogs", getLatestBlogs);
 router.get("/get-trending-blogs", getTrendingBlogs);
 router.get("/get-unique-categories", getUniqueCategories);
 router.get("/getBlogs", getBlogs)
+router.get("/search-blogs", searchBlogs)
 
 export default router;
