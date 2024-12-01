@@ -1,0 +1,271 @@
+import cloudinary from "../config/cloudinaryConfig.js";
+import Blog from "../model/blogSchema.js";
+import ApiResponse from "../utils/ApiResponse.js";
+import slugify from "slugify"; // Use to generate slugs
+import User from "../model/userSchema.js";
+import ApiError from "../utils/ApiError.js";
+import Category from "../model/categorySchema.js";
+import Tag from "../model/tagSchema.js";
+
+export const uploadImage = async (req, res, next) => {
+  try {
+    if (!req.file) {
+      return next(new ApiError("No image file provided", 404));
+    }
+
+    // Convert buffer to base64
+    const b64 = Buffer.from(req.file.buffer).toString("base64");
+    const dataURI = "data:" + req.file.mimetype + ";base64," + b64;
+
+    // Upload to cloudinary
+    const result = await cloudinary.uploader.upload(dataURI, {
+      folder: "draftblogapp", // Optional folder name in cloudinary
+    });
+
+    res
+      .status(200)
+      .json(ApiResponse.success(result, "Image uploaded successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const publishBlog = async (req, res, next) => {
+  try {
+    const {
+      title,
+      banner,
+      categories,
+      tags,
+      metaDescription,
+      content,
+      status,
+      scheduledDate,
+      readingTime,
+    } = req.body;
+
+    if (!title || !banner || !content) {
+      return next(new ApiError("Title, banner, and content are required", 400));
+    }
+
+    if (status === "scheduled" && !scheduledDate) {
+      return next(
+        new ApiError("Scheduled date is required for scheduled posts", 400)
+      );
+    }
+
+    if (scheduledDate && new Date(scheduledDate) < new Date()) {
+      return next(new ApiError("Scheduled date must be in the future", 400));
+    }
+
+    const titleExists = await Blog.findOne({ title });
+    if (titleExists) {
+      return next(new ApiError("A blog with this title already exists", 400));
+    }
+
+    const slug = slugify(title, { lower: true, strict: true });
+    // Check if the slug already exists
+    const existingBlog = await Blog.findOne({ slug });
+    if (existingBlog) {
+      return next(new ApiError("A blog with this title already exists", 400));
+    }
+
+    const newBlog = new Blog({
+      title,
+      slug,
+      banner: {
+        url: banner,
+      },
+      categories,
+      tags,
+      metaDescription,
+      content,
+      status,
+      readingTime,
+      author: req.user._id,
+    });
+
+    const savedBlog = await newBlog.save();
+
+    await User.findByIdAndUpdate(req.user._id, {
+      $push: {
+        publishedPosts: savedBlog._id,
+        blogs: savedBlog._id,
+      },
+      $inc: { "account_info.total_posts": 1 },
+      $set: { "account_info.last_post_date": new Date() },
+    });
+
+    const category = await Category.findOne({
+      category: categories,
+    });
+
+    await Category.findByIdAndUpdate(
+      category._id,
+      {
+        $push: { blogs: savedBlog._id },
+        $inc: { "meta.total_blogs": 1 },
+      },
+      { upsert: true }
+    );
+
+    if (tags && tags.length > 0) {
+      await Promise.all(
+        tags.map(async (tagName) => {
+          let tag = await Tag.findOne({ tag: tagName });
+
+          // Update the tag with the new blog ID
+          await Tag.findByIdAndUpdate(tag._id, {
+            $push: { blogs: savedBlog._id },
+            $inc: { tag_used_count: 1 },
+          });
+        })
+      );
+    }
+
+    res
+      .status(200)
+      .json(ApiResponse.success(savedBlog, "Blog published successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getLatestBlogs = async (req, res, next) => {
+  try {
+    const { maxLimit = 5, page = 1 } = req.query;
+    const skip = (page - 1) * maxLimit;
+
+    const blogs = await Blog.find({ status: "published" })
+      .sort({ createdAt: -1 })
+      .select(
+        "title metaDescription banner slug blogActivity categories createdAt"
+      )
+      .limit(Number(maxLimit))
+      .skip(Number(skip))
+      .populate("author", "profilePicture fullName username");
+
+    const totalBlogs = await Blog.countDocuments({ status: "published" });
+    const totalPages = Math.ceil(totalBlogs / maxLimit);
+    const hasNextPage = page < totalPages;
+
+    res.status(200).json(
+      ApiResponse.success(
+        {
+          blogs,
+          currentPage: Number(page),
+          totalPages,
+          totalBlogs,
+          hasNextPage,
+          nextPage: hasNextPage ? Number(page) + 1 : null,
+        },
+        "Latest blogs fetched"
+      )
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getTrendingBlogs = async (req, res, next) => {
+  try {
+    const { maxLimit = 5 } = req.query;
+    const blogs = await Blog.find({ status: "published" })
+      .sort({
+        blogActivity: -1,
+        createdAt: -1,
+      })
+      .limit(maxLimit)
+      .populate("author", "profilePicture fullName username")
+      .select(
+        "title metaDescription banner slug blogActivity categories createdAt"
+      );
+
+    res.status(200).json(ApiResponse.success(blogs, "Trending blogs fetched"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getUniqueCategories = async (req, res, next) => {
+  try {
+    const categories = await Category.find().select("category");
+    res
+      .status(200)
+      .json(ApiResponse.success(categories, "Unique categories fetched"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getBlogs = async (req, res, next) => {
+  try {
+    const { category, order } = req.query;
+
+    // Parse query parameters
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.min(
+      100,
+      Math.max(10, parseInt(req.query.limit, 10) || 10)
+    );
+    const sortDirection = order === "asc" ? 1 : -1;
+
+    // Calculate skip value for pagination
+    const skip = (page - 1) * limit;
+
+    // Build query object
+    const query = { status: "published" }; // Add status filter
+
+    let categoryDetails = null;
+
+    // Optional category filter
+    if (category && typeof category === "string") {
+      const trimmedCategory = category.trim();
+      query.categories = trimmedCategory;
+      categoryDetails = await Category.findOne({
+        category: trimmedCategory,
+      }).select("meta category");
+      if (!categoryDetails) {
+        return next(new ApiError(404, "Category not found"));
+      }
+    }
+
+    // Fetch blogs with pagination
+    const [blogs, totalBlogs] = await Promise.all([
+      Blog.find(query)
+        .sort({ createdAt: sortDirection })
+        .skip(skip)
+        .limit(limit)
+        .select(
+          "title slug banner categories createdAt metaDescription blogActivity"
+        )
+        .populate("author", "profilePicture fullName username")
+        .lean(),
+      Blog.countDocuments(query),
+    ]);
+
+    // Calculate pagination metadata
+    const totalPages = Math.ceil(totalBlogs / limit);
+    const hasNextPage = page < totalPages;
+
+    // Structured response for infinite scroll
+    res.status(200).json(
+      ApiResponse.success(
+        {
+          blogs,
+          categoryDetails,
+          pagination: {
+            currentPage: page,
+            totalPages,
+            totalBlogs,
+            hasNextPage,
+            nextPage: hasNextPage ? page + 1 : null,
+          },
+        },
+        "Blogs fetched successfully"
+      )
+    );
+  } catch (error) {
+    next(error);
+  }
+};
