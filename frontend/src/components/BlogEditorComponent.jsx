@@ -28,7 +28,7 @@ import Quote from "@editorjs/quote";
 import Marker from "@editorjs/marker";
 import Table from "@editorjs/table";
 import CodeTool from "@editorjs/code";
-import Warning from "@editorjs/warning";
+// import Warning from "@editorjs/warning";
 import Delimiter from "@editorjs/delimiter";
 import useAutoSave from "../hooks/useAutoSave";
 
@@ -144,10 +144,12 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
         underline: {
           class: Underline,
         },
-        link: {
+        linkTool: {
           class: LinkTool,
+          inlineToolbar: true,
           config: {
-            endpoint: "/api/fetchUrl", // Your URL fetch endpoint
+            // Provide a dummy endpoint if you don't have backend link fetching
+            endpoint: "https://example.com/link-fetch",
           },
         },
         inlineCode: {
@@ -178,14 +180,14 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
             placeholder: "Enter code here...",
           },
         },
-        warning: {
-          class: Warning,
-          inlineToolbar: true,
-          config: {
-            titlePlaceholder: "Title",
-            messagePlaceholder: "Message",
-          },
-        },
+        // warning: {
+        //   class: Warning,
+        //   inlineToolbar: true,
+        //   config: {
+        //     titlePlaceholder: "Title",
+        //     messagePlaceholder: "Message",
+        //   },
+        // },
         delimiter: {
           class: Delimiter,
         },

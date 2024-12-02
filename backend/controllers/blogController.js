@@ -328,3 +328,18 @@ export const searchBlogs = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getBlogBySlug = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const blog = await Blog.findOne({ slug }).populate(
+      "author",
+      "profilePicture fullName username"
+    );
+    res
+      .status(200)
+      .json(ApiResponse.success(blog, "Blog fetched successfully"));
+  } catch (error) {
+    next(error);
+  }
+};

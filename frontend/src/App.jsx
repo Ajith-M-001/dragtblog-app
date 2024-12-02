@@ -15,10 +15,11 @@ import NotificationSnackbar from "./components/NotificationSnackbar";
 import ForgotPassword from "./pages/ForgotPassword";
 import EditorPage from "./pages/EditorPage";
 import CategoryPage from "./pages/CategoryPage";
-import SearchPage from "./pages/SearchPage";
+// import SearchPage from "./pages/SearchPage";
 import NotFoundPage from "./components/NotFoundPage";
 import ProfilePage from "./pages/ProfilePage";
 import Search from "./pages/Search";
+import DetailedBlogPage from "./pages/DetailedBlogPage";
 
 const useThemeMode = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -85,8 +86,9 @@ const App = () => {
             <Route path="auth/success" element={<AuthSuccess />} />
             <Route path="auth/failure" element={<AuthFailure />} />
             <Route path="category/:categoryName" element={<CategoryPage />} />
-            <Route path="search" element={<Search/>} />
+            <Route path="search" element={<Search />} />
             <Route path="profile/:username" element={<ProfilePage />} />
+            <Route path="blog/:slug" element={<DetailedBlogPage />} />
             <Route path="*" element={<NotFoundPage />} /> {/* Add this line */}
           </Route>
           <Route path="editor" element={<EditorPage />} />

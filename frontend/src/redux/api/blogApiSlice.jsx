@@ -67,6 +67,13 @@ const blogApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["Blog"],
     }),
+    getBlogBySlug: builder.query({
+      query: (slug) => ({
+        url: `${BLOG_URL}/get-blog-by-slug/${slug}`,
+        method: "GET",
+      }),
+      providesTags: ["Blog"],
+    }),
   }),
 });
 
@@ -78,4 +85,5 @@ export const {
   useGetUniqueCategoriesQuery,
   useGetBlogsByCategoryQuery,
   useGetSearchResultsQuery,
+  useGetBlogBySlugQuery,
 } = blogApiSlice;

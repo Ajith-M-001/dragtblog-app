@@ -59,7 +59,7 @@ const ProfilePage = () => {
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [hasMore]);
+  }, [hasMore, isLoading]);
 
   console.log("dfdsafasdfasdf", blogs, hasMore, page);
 

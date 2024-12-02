@@ -1,14 +1,15 @@
 import { Box, Chip, Typography } from "@mui/material";
 import { formatDate } from "../utils/formatDate";
 import FavoriteIcon from "@mui/icons-material/Favorite";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 /* eslint-disable react/prop-types */
 const BlogPost = ({ blog }) => {
   const navigate = useNavigate();
+  console.log("dsfsa", blog?.slug)
   return (
     <Box sx={{ px: 3, py: 5 }}>
-      <Box sx={{ display: "flex", alignItems: "center", gap: 3 }}>
+      <Box component={Link} to={`/blog/${blog?.slug}`} sx={{ display: "flex", alignItems: "center", gap: 3, textDecoration: "none", color: "inherit" }}>
         <Box sx={{ flex: 1, display: "flex", flexDirection: "column", gap: 4 }}>
           <Box
             sx={{
