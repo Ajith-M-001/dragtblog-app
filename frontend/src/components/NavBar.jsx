@@ -80,7 +80,6 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
     }
   };
 
-  // console.log(theme);
   const [anchorEl, setAnchorEl] = useState(null);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   // const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);

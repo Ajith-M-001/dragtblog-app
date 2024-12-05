@@ -54,3 +54,15 @@ export const getAllTags = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getByTag = async (req, res, next) => {
+  try {
+    const { tag } = req.params;
+    const tagData = await Tag.findOne({ tag });
+    return res
+      .status(200)
+      .json(ApiResponse.success(tagData, "Tag fetched successfully", 200));
+  } catch (error) {
+    next(error);
+  }
+};

@@ -30,7 +30,6 @@ export const createCategory = async (req, res, next) => {
         ApiResponse.success(newCategory, "Category created successfully", 201)
       );
   } catch (error) {
-    console.log("error", error);
     next(error);
   }
 };
@@ -44,6 +43,22 @@ export const getAllCategories = async (req, res, next) => {
       .status(200)
       .json(
         ApiResponse.success(categories, "Categories fetched successfully", 200)
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getByCategory = async (req, res, next) => {
+  try {
+    const { category } = req.params;
+    console.log("category", category);
+    const categoryData = await Category.findOne({ category });
+    console.log("categoryData", categoryData);
+    return res
+      .status(200)
+      .json(
+        ApiResponse.success(categoryData, "Category fetched successfully", 200)
       );
   } catch (error) {
     next(error);

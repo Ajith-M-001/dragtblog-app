@@ -15,7 +15,6 @@ const CategoryPage = () => {
   const { categoryName } = useParams();
   // Fetch blogs based on the selected category
   const { data, isLoading } = useGetBlogsByCategoryQuery(categoryName);
-  console.log(data);
   const category = data?.data?.categoryDetails;
   const blogs = data?.data?.blogs;
 

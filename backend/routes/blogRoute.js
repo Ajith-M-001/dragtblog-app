@@ -9,6 +9,7 @@ import {
   getBlogs,
   searchBlogs,
   getBlogBySlug,
+  getSimilarBlogs,
 } from "../controllers/blogController.js";
 import { isAuthenticated } from "../utils/verifyToken.js";
 
@@ -23,5 +24,6 @@ router.get("/get-unique-categories", getUniqueCategories);
 router.get("/getBlogs", getBlogs)
 router.get("/search-blogs", searchBlogs);
 router.get("/get-blog-by-slug/:slug", getBlogBySlug);
+router.get("/get-similar-blogs/:slug", getSimilarBlogs);
 
 export default router;

@@ -4,9 +4,18 @@ import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
 import apiSlice from "./api/apiSlice";
 import notificationReducer from "./slices/notificationSlice";
+import blogSlice from "./slices/blogSlice";
+
 
 const userPersistConfig = {
   key: "user",
+  storage,
+  version: 1,
+  blacklist: ["error", "isLoading"],
+};
+
+const blogPersistConfig = {
+  key: "blog",
   storage,
   version: 1,
   blacklist: ["error", "isLoading"],
@@ -20,12 +29,14 @@ const userPersistConfig = {
 // };
 
 const persistedUserReducer = persistReducer(userPersistConfig, userReducer);
+const persistedBlogReducer = persistReducer(blogPersistConfig, blogSlice);
 
 // const persistedCartReducer = persistReducer(cartPersistConfig, cardReducer);
 
 const rootReducer = combineReducers({
   user: persistedUserReducer,
   Notification: notificationReducer,
+  blog: persistedBlogReducer,
   // cart: persistedCartReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 });

@@ -69,7 +69,6 @@ const Search = () => {
 
   const { data: userData, isLoading: userIsLoading } =
     useSearchUserQuery(query);
-  console.log(page, hasMore, blogs);
 
   return (
     <Container maxWidth="xl" className="min-height">

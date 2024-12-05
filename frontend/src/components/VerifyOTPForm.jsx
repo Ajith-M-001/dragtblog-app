@@ -63,7 +63,6 @@ const VerifyOTPForm = () => {
   });
 
   const onSubmit = async (values, { resetForm }) => {
-    console.log(values);
     try {
       const response = await verifyOTP({
         email: email.email,

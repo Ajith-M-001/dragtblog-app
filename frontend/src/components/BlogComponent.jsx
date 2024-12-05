@@ -2,12 +2,15 @@
 
 import { Box, Container, Typography, useTheme } from "@mui/material";
 import { Link } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { selectCurrentBlog } from "../redux/slices/blogSlice";
 
-const BlogComponent = ({ content }) => {
+const BlogComponent = () => {
   const theme = useTheme();
+  const currentBlog = useSelector(selectCurrentBlog);
+  const content = currentBlog?.content;
 
   const renderBlock = (block) => {
-    console.log(block);
     switch (block.type) {
       case "paragraph": {
         return (

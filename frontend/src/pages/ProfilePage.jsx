@@ -27,7 +27,6 @@ const ProfilePage = () => {
     maxLimit,
   });
   const { userInfo } = useSelector((state) => state.user);
-  console.log(data);
 
   useEffect(() => {
     setBlogs([]);
@@ -61,7 +60,6 @@ const ProfilePage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, isLoading]);
 
-  console.log("dfdsafasdfasdf", blogs, hasMore, page);
 
   const {
     fullName,

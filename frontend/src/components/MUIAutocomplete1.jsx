@@ -39,7 +39,6 @@ const MUIAutocomplete1 = ({
           });
         }
 
-        console.log("filtered", filtered);
         return filtered;
       }}
       getOptionLabel={getOptionLabel}
@@ -54,7 +53,6 @@ const MUIAutocomplete1 = ({
         />
       )}
       renderOption={(props, option) => {
-        console.log("optionasdf", option);
         return (
           <Box key={option.value} component="li" {...props}>
             {option.label ? (

@@ -27,10 +27,6 @@ const Homepage = () => {
   const maxLimit = 5;
   const theme = useTheme();
 
-  console.log(blogs);
-  console.log(hasMore);
-  console.log(page);
-
   const navigate = useNavigate();
   const {
     data: latestBlogs,
@@ -42,7 +38,6 @@ const Homepage = () => {
   const { data: uniqueCategories, isLoading: uniqueCategoriesLoading } =
     useGetUniqueCategoriesQuery();
 
-  console.log(latestBlogs);
   const skeletonArray = new Array(maxLimit).fill(null);
 
   useEffect(() => {
@@ -68,7 +63,6 @@ const Homepage = () => {
     }
   };
 
-  console.log(page);
 
   useEffect(() => {
     window.addEventListener("scroll", handleScroll);

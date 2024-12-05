@@ -23,7 +23,6 @@ const SearchPage = () => {
   const { data, isLoading } = useGetSearchResultsQuery(query);
   const { data: userData, isLoading: userIsLoading } =
     useSearchUserQuery(query);
-  console.log("dataasdf", userData);
   return (
     <Container className="min-height" maxWidth="xl">
       <Grid container>

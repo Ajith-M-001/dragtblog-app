@@ -200,7 +200,9 @@ export const getUniqueCategories = async (req, res, next) => {
 
 export const getBlogs = async (req, res, next) => {
   try {
-    const { category, order } = req.query;
+    const { category, order, tag, maxLimit } = req.query;
+
+    console.log("dfas", category, order, tag, maxLimit);
 
     // Parse query parameters
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
@@ -332,13 +334,44 @@ export const searchBlogs = async (req, res, next) => {
 export const getBlogBySlug = async (req, res, next) => {
   try {
     const { slug } = req.params;
-    const blog = await Blog.findOne({ slug }).populate(
-      "author",
-      "profilePicture fullName username"
-    );
+    const blog = await Blog.findOneAndUpdate(
+      { slug },
+      { $inc: { "blogActivity.total_views": 1 } },
+      { new: true }
+    ).populate("author", "profilePicture fullName username");
+
+    await User.findByIdAndUpdate(blog.author._id, {
+      $inc: { "account_info.total_reads": 1 },
+    });
+
     res
       .status(200)
       .json(ApiResponse.success(blog, "Blog fetched successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSimilarBlogs = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const { maxLimit = 3 } = req.query;
+    console.log("dfas", slug);
+      const blog = await Blog.findOne({ slug });
+    const similarBlogs = await Blog.find({
+      categories: { $in: blog.categories },
+      _id: { $ne: blog._id },
+    })
+      .sort({ createdAt: -1 })
+      .select(
+        "title slug banner categories createdAt metaDescription blogActivity"
+      )
+      .limit(maxLimit)
+      .populate("author", "profilePicture fullName username");
+
+    res
+      .status(200)
+      .json(ApiResponse.success(similarBlogs, "Similar blogs fetched"));
   } catch (error) {
     next(error);
   }

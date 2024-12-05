@@ -110,7 +110,6 @@ const ForgotPassword = () => {
 
       setCountdown(30);
       setCanResend(false);
-      console.log(response);
     } catch (error) {
       dispatch(
         showNotification({
@@ -127,7 +126,6 @@ const ForgotPassword = () => {
         case 1: {
           const response = await forgotPassword(values);
 
-          console.log(response);
           if (response.error) {
             dispatch(
               showNotification({

@@ -82,7 +82,6 @@ const UserAuthForm = ({ type }) => {
     try {
       if (type === "signup") {
         const response = await signup(values).unwrap();
-        console.log(`sign up successful`, response);
         dispatch(
           showNotification({
             open: true,

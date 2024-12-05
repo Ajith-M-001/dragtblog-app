@@ -141,7 +141,6 @@ export const logout = async (req, res) => {
   try {
     // Clear the access_token cookie
     const userId = req.user._id;
-    console.log(userId);
     cacheUtils.del(`${CACHE_KEYS.USER_PROFILE}${userId}`),
       res.clearCookie("access_token", {
         httpOnly: true,
@@ -253,7 +252,6 @@ export const resendOTP = async (req, res) => {
       .status(200)
       .json(ApiResponse.success({}, "OTP resent successfully", 200));
   } catch (error) {
-    console.log(error);
     return res
       .status(500)
       .json(ApiResponse.error("An error occurred while resending OTP", 500));

@@ -19,8 +19,18 @@ const categoryApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["Category"],
     }),
+    getByCategory: builder.query({
+      query: (category) => ({
+        url: `${CATEGORY_URL}/get-By-Category/${category}`,
+        method: "GET",
+      }),
+      providesTags: ["Category"],
+    }),
   }),
 });
 
-export const { useCreateCategoryMutation, useGetAllCategoriesQuery } =
-  categoryApiSlice;
+export const {
+  useCreateCategoryMutation,
+  useGetAllCategoriesQuery,
+  useGetByCategoryQuery,
+} = categoryApiSlice;

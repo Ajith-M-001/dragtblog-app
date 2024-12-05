@@ -1,25 +1,45 @@
-/* eslint-disable no-unsafe-optional-chaining */
 import {
   Avatar,
   Box,
   Button,
+  Chip,
   Container,
+  Divider,
+  Grid,
   Skeleton,
   Typography,
   useTheme,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
-import { useGetBlogBySlugQuery } from "../redux/api/blogApiSlice";
+import { Link, useParams } from "react-router-dom";
+import {
+  useGetBlogBySlugQuery,
+  useGetSimilarBlogsQuery,
+} from "../redux/api/blogApiSlice";
 import BlogComponent from "../components/BlogComponent";
 import { formatDate } from "../utils/formatDate";
+import BlogInteraction from "../components/BlogInteraction";
+import BlogCard from "../components/BlogCard";
+import NoDataFound from "../components/NoDataFound";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect } from "react";
+import { setCurrentBlog } from "../redux/slices/blogSlice";
 
 const DetailedBlogPage = () => {
   const { slug } = useParams();
   const theme = useTheme();
+  const dispatch = useDispatch();
 
   const { data, isLoading } = useGetBlogBySlugQuery(slug);
 
-  console.log("data", data);
+  useEffect(() => {
+    dispatch(setCurrentBlog(data?.data));
+  }, [data, dispatch]);
+
+  const { data: similarBlogs, isLoading: similarBlogsLoading } =
+    useGetSimilarBlogsQuery({
+      slug,
+      maxLimit: 3,
+    });
 
   return (
     <Container maxWidth="md" className="min-height">
@@ -61,8 +81,23 @@ const DetailedBlogPage = () => {
           </>
         ) : (
           <>
+            <Box sx={{ mt: theme.spacing(4) }}>
+              <img
+                src={data?.data?.banner?.url}
+                alt={data?.data?.title || "Blog Banner"}
+                style={{ width: "100%", height: "auto", borderRadius: "8px" }}
+              />
+            </Box>
             <Typography variant="h4" sx={{ fontSize: "2rem", fontWeight: 600 }}>
               {data?.data?.title}
+            </Typography>
+            <Typography variant="subtitle2" sx={{ mt: 2, fontWeight: 500 }}>
+              <Link
+                to={`/category/${data?.data?.categories}`}
+                style={{ textDecoration: "none", color: "inherit" }}
+              >
+                Category: {data?.data?.categories}
+              </Link>
             </Typography>
 
             <Typography
@@ -81,7 +116,7 @@ const DetailedBlogPage = () => {
               sx={{
                 display: "flex",
                 alignItems: "center",
-                mt: 4, // margin top with theme spacing
+                my: 4, // margin top with theme spacing
               }}
             >
               <Avatar
@@ -124,19 +159,48 @@ const DetailedBlogPage = () => {
                 </Box>
               </Box>
             </Box>
+            <Divider />
 
-            <Box sx={{ mt: theme.spacing(4) }}>
-              <img
-                src={data?.data?.banner?.url}
-                alt={data?.data?.title || "Blog Banner"}
-                style={{ width: "100%", height: "auto", borderRadius: "8px" }}
-              />
+            <BlogInteraction />
+            <Divider />
+
+            <BlogComponent />
+
+            <Box sx={{ mt: 2 }}>
+              {data?.data?.tags?.map((tag, index) => (
+                <Chip
+                  key={index}
+                  label={tag}
+                  component={Link} // Make the Chip a link
+                  to={`/tag/${tag}`} // Adjust the path as necessary
+                  sx={{ mr: 1, cursor: "pointer" }} // Add some margin to the right
+                />
+              ))}
             </Box>
 
-            <BlogComponent
-              key={data?.data?._id}
-              content={data?.data?.content}
-            />
+            <Divider />
+
+            <BlogInteraction />
+            <Divider />
+
+            <Box sx={{ my: theme.spacing(4) }}>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Similar Blogs
+              </Typography>
+              {similarBlogsLoading ? (
+                <Skeleton variant="text" width="60%" height={40} />
+              ) : similarBlogs?.data && similarBlogs?.data?.length > 0 ? (
+                <Grid container spacing={2} sx={{ mt: theme.spacing(2) }}>
+                  {similarBlogs?.data?.map((blog) => (
+                    <Grid item xs={12} sm={6} key={blog?._id}>
+                      <BlogCard blog={blog} />
+                    </Grid>
+                  ))}
+                </Grid>
+              ) : (
+                <NoDataFound message="No blogs found" />
+              )}
+            </Box>
           </>
         )}
       </Box>

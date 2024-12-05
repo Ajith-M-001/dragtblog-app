@@ -23,7 +23,6 @@ const blogApiSlice = apiSlice.injectEndpoints({
     }),
     getLatestBlogs: builder.query({
       query: ({ page, maxLimit }) => {
-        console.log("dafasdf", page, maxLimit);
         return {
           url: `${BLOG_URL}/get-latest-blogs`,
           method: "GET",
@@ -74,6 +73,14 @@ const blogApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["Blog"],
     }),
+    getSimilarBlogs: builder.query({
+      query: ({ slug, maxLimit }) => ({
+        url: `${BLOG_URL}/get-similar-blogs/${slug}`,
+        method: "GET",
+        params: { maxLimit },
+      }),
+      providesTags: ["Blog"],
+    }),
   }),
 });
 
@@ -86,4 +93,5 @@ export const {
   useGetBlogsByCategoryQuery,
   useGetSearchResultsQuery,
   useGetBlogBySlugQuery,
+  useGetSimilarBlogsQuery,
 } = blogApiSlice;

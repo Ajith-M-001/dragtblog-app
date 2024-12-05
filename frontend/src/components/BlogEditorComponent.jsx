@@ -40,6 +40,8 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
   const editorRef = useRef(null);
   const dispatch = useDispatch();
 
+  console.log("sdfasd", blogData?.content);
+
   const { saveStatus, handleAutoSave } = useAutoSave(blogData);
   const [uploadBanner, { isLoading: isUploading }] = useUploadBannerMutation();
 
@@ -63,6 +65,10 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
 
   useEffect(() => {
     if (editorRef.current) {
+      if (editorRef.current.destroy) {
+        editorRef.current.destroy();
+      }
+      editorRef.current = null;
       return;
     }
 
@@ -103,14 +109,11 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
                     }
                   );
 
-                  console.log("resonseaa", response);
-
                   if (!response.ok) {
                     throw new Error(response.error || "Upload failed");
                   }
 
                   const result = await response.json();
-                  console.log("resultaa", result);
 
                   return {
                     success: 1,
@@ -192,7 +195,7 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
           class: Delimiter,
         },
       },
-      data: blogData.content || {
+      data: blogData?.content || {
         blocks: [],
       },
       onChange: async () => {
@@ -208,20 +211,20 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
     });
 
     editorRef.current = editor;
-
+    const timeoutId = setTimeout(editor, 100);
     return () => {
+      clearTimeout(timeoutId);
       if (editorRef.current && editorRef.current.destroy) {
         editorRef.current.destroy();
         editorRef.current = null;
       }
     };
-  }, []);
+  }, [blogData]);
 
   const handleFile = async (file) => {
     try {
       const formData = new FormData();
       formData.append("image", file);
-      console.log(formData);
       const { data } = await uploadBanner(formData).unwrap();
       setBlogData({ ...blogData, banner: data.secure_url });
     } catch (error) {

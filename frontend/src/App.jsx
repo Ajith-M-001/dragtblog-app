@@ -92,6 +92,7 @@ const App = () => {
             <Route path="*" element={<NotFoundPage />} /> {/* Add this line */}
           </Route>
           <Route path="editor" element={<EditorPage />} />
+          <Route path="edit-blog/:slug" element={<EditorPage />} />
         </Routes>
       </ThemeProvider>
 

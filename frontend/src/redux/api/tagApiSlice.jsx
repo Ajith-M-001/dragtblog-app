@@ -18,7 +18,18 @@ const tagApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["Tag"],
     }),
+    getByTag: builder.query({
+      query: (tag) => ({
+        url: `${TAG_URL}/get-By-Tag/${tag}`,
+        method: "GET",
+      }),
+      providesTags: ["Tag"],
+    }),
   }),
 });
 
-export const { useCreateTagMutation, useGetAllTagsQuery } = tagApiSlice;
+export const {
+  useCreateTagMutation,
+  useGetAllTagsQuery,
+  useGetByTagQuery,
+} = tagApiSlice;

@@ -6,7 +6,6 @@ import { Link, useNavigate } from "react-router-dom";
 /* eslint-disable react/prop-types */
 const BlogPost = ({ blog }) => {
   const navigate = useNavigate();
-  console.log("dsfsa", blog?.slug)
   return (
     <Box sx={{ px: 3, py: 5 }}>
       <Box component={Link} to={`/blog/${blog?.slug}`} sx={{ display: "flex", alignItems: "center", gap: 3, textDecoration: "none", color: "inherit" }}>
@@ -45,7 +44,11 @@ const BlogPost = ({ blog }) => {
               variant="filled"
               sx={{ marginRight: 4, marginBottom: 1 }}
               label={blog.categories}
-              onClick={() => navigate(`/category/${blog.categories}`)}
+              onClick={(e) => {
+                e.preventDefault(); 
+                e.stopPropagation();
+                navigate(`/category/${blog.categories}`);
+              }}
             />
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <FavoriteIcon sx={{ marginRight: 1, fontSize: 22 }} />
