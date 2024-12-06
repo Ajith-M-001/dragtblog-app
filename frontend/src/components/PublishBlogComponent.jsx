@@ -47,6 +47,31 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
 
   console.log("dasfdsfdas", blogData?.tags);
 
+
+
+  // i want like 
+  // [
+  //   "agatha all along",
+  //   "marvel",
+  //   {
+  //     meta: {
+  //       total_views: 0,
+  //       total_followers: 0,
+  //     },
+  //     _id: "67467a0a448dfc4546c143a5",
+  //     tag: "eternals",
+  //     slug: "eternals",
+  //     description: "",
+  //     blogs: ["67467a1c448dfc4546c143ac"],
+  //     followers: [],
+  //     tag_used_count: 1,
+  //     created_by: "67451d7092c58605395f1869",
+  //     createdAt: "2024-11-27T01:46:50.965Z",
+  //     updatedAt: "2024-11-27T01:47:08.572Z",
+  //     __v: 0,
+  //   },
+  // ];
+
   useEffect(() => {
     const fetchTagData = async () => {
       const promises = blogData?.tags.map((tag) =>
