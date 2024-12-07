@@ -40,7 +40,7 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
   const editorRef = useRef(null);
   const dispatch = useDispatch();
 
-  console.log("sdfasd", blogData?.content);
+  console.log("sdfasd", blogData);
 
   const { saveStatus, handleAutoSave } = useAutoSave(blogData);
   const [uploadBanner, { isLoading: isUploading }] = useUploadBannerMutation();
@@ -211,26 +211,30 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
     });
 
     editorRef.current = editor;
-    const timeoutId = setTimeout(editor, 100);
     return () => {
-      clearTimeout(timeoutId);
       if (editorRef.current && editorRef.current.destroy) {
         editorRef.current.destroy();
         editorRef.current = null;
       }
     };
-  }, [blogData]);
+  }, [blogData?.content]);
 
   const handleFile = async (file) => {
     try {
       const formData = new FormData();
       formData.append("image", file);
       const { data } = await uploadBanner(formData).unwrap();
-      setBlogData({ ...blogData, banner: data.secure_url });
+      console.log("datadsafads", data);
+      setBlogData((prevState) => ({
+        ...prevState,
+        banner: { url: data.secure_url },
+      }));
     } catch (error) {
       console.log(error);
     }
   };
+
+  console.log("blogDataadfdsaf", blogData);
 
   const handleFileUpload = (e) => {
     const file = e.target.files[0];
@@ -269,7 +273,7 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
 
   const handleTitleChange = (e) => {
     const title = e.target.value;
-    setBlogData({ ...blogData, title });
+    setBlogData((prevState) => ({ ...prevState, title })); // Ensure state is updated correctly
     handleAutoSave({ title });
   };
 
@@ -309,7 +313,7 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
                 {saveStatus} in drafts
               </Typography>
               <Button onClick={handlePreviewClick} variant="containedPrimary">
-                Publish
+                Preview
               </Button>
               <Avatar
                 sx={{
@@ -434,7 +438,7 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
           fullWidth
           variant="outlined"
           placeholder="Enter your blog title"
-          value={blogData.title || ""}
+          value={blogData?.title || ""}
           onChange={handleTitleChange}
           sx={{
             mt: theme.spacing(3),

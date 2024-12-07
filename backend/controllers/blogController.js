@@ -357,7 +357,7 @@ export const getSimilarBlogs = async (req, res, next) => {
     const { slug } = req.params;
     const { maxLimit = 3 } = req.query;
     console.log("dfas", slug);
-      const blog = await Blog.findOne({ slug });
+    const blog = await Blog.findOne({ slug });
     const similarBlogs = await Blog.find({
       categories: { $in: blog.categories },
       _id: { $ne: blog._id },
@@ -372,6 +372,51 @@ export const getSimilarBlogs = async (req, res, next) => {
     res
       .status(200)
       .json(ApiResponse.success(similarBlogs, "Similar blogs fetched"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const editBlog = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    
+    const {
+      title,
+      banner,
+      categories,
+      tags,
+      metaDescription,
+      content,
+      status,
+      scheduledDate,
+      readingTime,
+    } = req.body;
+
+    const blog = await Blog.findOne({ slug });
+    if (!blog) {
+      return next(new ApiError("Blog not found", 404));
+    }
+
+    const updatedBlog = await Blog.findByIdAndUpdate(
+      blog._id,
+      {
+        title,
+        banner,
+        categories,
+        tags,
+        metaDescription,
+        content,
+        status,
+        scheduledDate,
+        readingTime,
+      },
+      { new: true }
+    );
+
+    res
+      .status(200)
+      .json(ApiResponse.success(updatedBlog, "Blog updated successfully"));
   } catch (error) {
     next(error);
   }

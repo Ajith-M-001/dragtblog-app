@@ -81,6 +81,14 @@ const blogApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["Blog"],
     }),
+    editBlog: builder.mutation({
+      query: ({ slug, blogData }) => ({
+        url: `${BLOG_URL}/edit-blog/${slug}`,
+        method: "PUT",
+        body: blogData,
+      }),
+      invalidatesTags: ["Blog"],
+    }),
   }),
 });
 
@@ -94,4 +102,5 @@ export const {
   useGetSearchResultsQuery,
   useGetBlogBySlugQuery,
   useGetSimilarBlogsQuery,
+  useEditBlogMutation,
 } = blogApiSlice;

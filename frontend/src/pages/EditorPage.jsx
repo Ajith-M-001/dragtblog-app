@@ -24,24 +24,19 @@ const EditorPage = () => {
   console.log("editorBlogData after fetching", editorBlogData);
 
   const [editorState, setEditorState] = useState("editor");
-  const [blogData, setBlogData] = useState({});
-  // const [blogData, setBlogData] = useState(() => {
-  //   const blogDraft = localStorage.getItem("blogDraft");
-  //   return blogDraft
-  //     ? JSON.parse(blogDraft)
-  //     : {
-  //         title: "",
-  //         banner: null,
-  //         content: null,
-  //         tags: [],
-  //         categories: "",
-  //         metaDescription: "",
-  //         status: "draft",
-  //         scheduledDate: null,
-  //         lastSaved: null,
-  //         isDirty: false,
-  //       };
-  // });
+  const [blogData, setBlogData] = useState({
+    title: "",
+    banner: null,
+    content: null,
+    tags: [],
+    categories: "",
+    metaDescription: "",
+    status: "draft",
+    scheduledDate: null,
+    lastSaved: null,
+    isDirty: false,
+    slug: "",
+  });
 
   useEffect(() => {
     if (editorBlogData) {
@@ -56,6 +51,7 @@ const EditorPage = () => {
         scheduledDate: editorBlogData?.scheduledDate,
         lastSaved: editorBlogData?.lastSaved,
         isDirty: false,
+        slug: editorBlogData?.slug,
       });
     }
   }, [editorBlogData, slug]);

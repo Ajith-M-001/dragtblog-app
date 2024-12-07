@@ -15,7 +15,7 @@ import {
   useTheme,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import { usePublishBlogMutation } from "../redux/api/blogApiSlice";
+import { useEditBlogMutation, usePublishBlogMutation } from "../redux/api/blogApiSlice";
 import { useDispatch } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -39,7 +39,6 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
   const { data: allTags } = useGetAllTagsQuery();
   const [tagData, setTagData] = useState([]);
 
-
   const [createCategory] = useCreateCategoryMutation();
   const [createTag] = useCreateTagMutation();
 
@@ -47,9 +46,18 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
 
   console.log("dasfdsfdas", blogData?.tags);
 
+  const filteredTags = allTags?.data?.filter(
+    (tag) => blogData.tags && blogData?.tags.includes(tag.tag)
+  );
+  console.log("filteredTags", filteredTags);
 
+  if (filteredTags?.length > 0) {
+    blogData.tags = filteredTags;
+  }
 
-  // i want like 
+  console.log("blogDatafdfds", blogData);
+
+  // i want like
   // [
   //   "agatha all along",
   //   "marvel",
@@ -86,7 +94,7 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
       }
     };
 
-    if (blogData?.tags.length > 0) {
+    if (blogData?.tags && blogData?.tags.length > 0) {
       fetchTagData();
     }
   }, [blogData?.tags]);
@@ -137,6 +145,7 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
 
   const [publishBlog, { isLoading: publishBlogLoading }] =
     usePublishBlogMutation();
+  const [editBlog, { isLoading: editBlogLoading }] = useEditBlogMutation();
 
   const calculateReadingStats = () => {
     if (!blogData.content || !blogData.content.blocks)
@@ -356,6 +365,35 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
     }
   };
 
+  const handleEditBlog = async () => {
+    const stats = calculateReadingStats();
+    const blogDataWithStats = {
+      ...blogData,
+      readingTime: {
+        minutes: stats.minutes,
+        words: stats.words,
+      },
+      categories: blogData.categories.category,
+      tags: blogData.tags.map((tag) => tag.tag),
+      status: "published",
+    };
+    console.log("blogDataWithStats", blogDataWithStats);
+    try {
+      const response = await editBlog({
+        slug: blogData.slug,
+        blogData: blogDataWithStats,
+      });
+      if (response.data.data) {
+        setEditorState("editor");
+        setBlogData({});
+        localStorage.removeItem("blogDraft");
+        navigate("/");
+      }
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   const readingStats = calculateReadingStats();
 
   return (
@@ -371,14 +409,26 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
             >
               Back to Editor
             </Button>
-            <Button
-              onClick={handlePublishBlog}
-              variant="contained"
-              color="primary"
-              disabled={publishBlogLoading}
-            >
-              {publishBlogLoading ? "Publishing..." : "Publish"}
-            </Button>
+            {/* Conditional Button Rendering */}
+            {blogData.slug === "" ? (
+              <Button
+                onClick={handlePublishBlog}
+                variant="contained"
+                color="primary"
+                disabled={publishBlogLoading}
+              >
+                {publishBlogLoading ? "Publishing..." : "Publish"}
+              </Button>
+            ) : (
+              <Button
+                onClick={handleEditBlog}
+                variant="contained"
+                color="primary"
+                disabled={editBlogLoading}  
+              >
+                {editBlogLoading ? "Editing..." : "Edit Blog"}
+              </Button>
+            )}
           </Toolbar>
         </Container>
       </AppBar>
