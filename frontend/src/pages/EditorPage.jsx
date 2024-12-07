@@ -26,7 +26,7 @@ const EditorPage = () => {
   const [editorState, setEditorState] = useState("editor");
   const [blogData, setBlogData] = useState({
     title: "",
-    banner: null,
+    banner: { url: "" },
     content: null,
     tags: [],
     categories: "",
@@ -42,7 +42,8 @@ const EditorPage = () => {
     if (editorBlogData) {
       setBlogData({
         title: editorBlogData?.title,
-        banner: editorBlogData?.banner?.url,
+        // banner: { url: editorBlogData?.banner?.url },
+        banner: editorBlogData?.banner,  // Remove the nested object creation
         content: editorBlogData?.content,
         tags: editorBlogData?.tags,
         categories: editorBlogData?.categories,
@@ -54,7 +55,7 @@ const EditorPage = () => {
         slug: editorBlogData?.slug,
       });
     }
-  }, [editorBlogData, slug]);
+  }, []);
 
   console.log("dafds", blogData);
 

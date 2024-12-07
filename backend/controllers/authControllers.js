@@ -13,7 +13,8 @@ import Blog from "../model/blogSchema.js";
 
 export const signup = async (req, res, next) => {
   try {
-    const { fullName, email, password } = req.body;
+    console.log("req.body", req.body);
+    const { fullName, email, password , bio = "" } = req.body;
 
     if (!fullName || !email || !password) {
       return res
@@ -23,8 +24,12 @@ export const signup = async (req, res, next) => {
     // Generate a username from email (new addition)
     const username = email.split("@")[0];
 
+    console.log("username", username);
+
     // Check if a user with the same email or username already exists
     const existingUser = await User.findOne({ email });
+
+    console.log("existingUser", existingUser);
 
     if (existingUser) {
       return res
@@ -33,10 +38,13 @@ export const signup = async (req, res, next) => {
     }
 
     const hashedPassword = await bcrypt.hash(password, 11);
+    console.log("hashedPassword", hashedPassword);
 
     const verificationOTP = Math.floor(
       100000 + Math.random() * 900000
     ).toString();
+
+    console.log("verificationOTP", verificationOTP);
 
     // Add OTP expiry time (10 minutes from now)
     // const verificationOTPExpiry = new Date(Date.now() + 10 * 60 * 1000);
@@ -51,6 +59,8 @@ export const signup = async (req, res, next) => {
       verificationOTP,
       verificationOTPExpiry,
     });
+
+    console.log("user", user);
 
     sendVerificationCode(user.email, verificationOTP);
 
@@ -70,6 +80,7 @@ export const signup = async (req, res, next) => {
         )
       );
   } catch (error) {
+    console.log("erroradsf", error);
     // Handle any other errors that occur during the signup process
     next(new ApiError(500, "An error occurred during signup.")); // Create a custom error
   }
@@ -77,6 +88,7 @@ export const signup = async (req, res, next) => {
 
 export const signin = async (req, res, next) => {
   const { email, password } = req.body;
+  console.log("email", email);
 
   try {
     // Check for missing fields

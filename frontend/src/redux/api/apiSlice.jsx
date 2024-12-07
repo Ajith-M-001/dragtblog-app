@@ -10,6 +10,8 @@ const baseQuery = fetchBaseQuery({
   credentials: "include",
 });
 
+console.log("asdf", import.meta.env.VITE_API_BASE_URL_DEVELOP);
+
 // Create a custom navigation event
 const customNavigate = new CustomEvent("tokenExpired");
 

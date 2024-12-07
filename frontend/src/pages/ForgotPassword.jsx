@@ -9,7 +9,7 @@ import {
 import { motion } from "framer-motion";
 import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import MuiTextField from "../components/MUITextField";
+import MuiTextField from "../components/MuiTextField";
 import { Formik, Form } from "formik";
 import * as yup from "yup";
 import { Email, ArrowBack, Lock } from "@mui/icons-material";

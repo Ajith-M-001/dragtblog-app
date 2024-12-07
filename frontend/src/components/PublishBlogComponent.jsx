@@ -44,7 +44,7 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
 
   console.log("Dfasdfasd", allTags);
 
-  console.log("dasfdsfdas", blogData?.tags);
+  console.log("dasfdsfdas", blogData);
 
   const filteredTags = allTags?.data?.filter(
     (tag) => blogData.tags && blogData?.tags.includes(tag.tag)
@@ -478,7 +478,7 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
               {blogData.banner && (
                 <CardMedia
                   component="img"
-                  image={blogData.banner}
+                  image={blogData.banner.url}
                   alt="Banner image"
                   sx={{
                     width: "100%",

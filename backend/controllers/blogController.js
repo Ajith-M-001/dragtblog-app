@@ -74,7 +74,7 @@ export const publishBlog = async (req, res, next) => {
       title,
       slug,
       banner: {
-        url: banner,
+        url: banner.url,
       },
       categories,
       tags,

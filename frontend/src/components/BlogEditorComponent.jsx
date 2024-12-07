@@ -228,6 +228,8 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
       setBlogData((prevState) => ({
         ...prevState,
         banner: { url: data.secure_url },
+        isDirty: true
+
       }));
     } catch (error) {
       console.log(error);
@@ -328,7 +330,7 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
       </AppBar>
       <Container className="min-height" maxWidth="md">
         <Box
-          onClick={() => !blogData?.banner && imageRef.current.click()}
+          onClick={() => imageRef.current.click()}
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -380,7 +382,7 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
                   sx={{ position: "relative", width: "100%", height: "100%" }}
                 >
                   <img
-                    src={blogData.banner}
+                    src={blogData.banner.url}
                     alt="Blog banner"
                     style={{
                       width: "100%",

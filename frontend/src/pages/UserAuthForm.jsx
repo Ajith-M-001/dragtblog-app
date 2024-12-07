@@ -8,7 +8,7 @@ import {
 } from "@mui/material";
 import { Formik, Form } from "formik";
 import * as Yup from "yup";
-import MuiTextField from "../components/MUITextField";
+import MuiTextField from "../components/MuiTextField";
 import {
   useSigninMutation,
   useSignupMutation,
