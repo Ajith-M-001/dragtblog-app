@@ -424,7 +424,7 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
                 onClick={handleEditBlog}
                 variant="contained"
                 color="primary"
-                disabled={editBlogLoading}  
+                disabled={editBlogLoading}
               >
                 {editBlogLoading ? "Editing..." : "Edit Blog"}
               </Button>
@@ -478,7 +478,7 @@ const PublishBlogComponent = ({ blogData, setBlogData, setEditorState }) => {
               {blogData.banner && (
                 <CardMedia
                   component="img"
-                  image={blogData.banner}
+                  image={blogData.banner.url}
                   alt="Banner image"
                   sx={{
                     width: "100%",

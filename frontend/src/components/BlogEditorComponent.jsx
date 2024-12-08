@@ -217,7 +217,9 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
         editorRef.current = null;
       }
     };
-  }, [blogData?.content]);
+  }, []);
+
+  
 
   const handleFile = async (file) => {
     try {
@@ -280,6 +282,7 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
   const handlePreviewClick = () => {
     dispatch(setEditorState("preview"));
   };
+  
 
   return (
     <Box sx={{ flexGrow: 1 }}>
@@ -328,7 +331,7 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
       </AppBar>
       <Container className="min-height" maxWidth="md">
         <Box
-          onClick={() => !blogData?.banner && imageRef.current.click()}
+          onClick={() =>  imageRef.current.click()}
           onDragEnter={handleDragEnter}
           onDragOver={handleDragOver}
           onDragLeave={handleDragLeave}
@@ -380,7 +383,7 @@ const BlogEditorComponent = ({ blogData, setBlogData, setEditorState }) => {
                   sx={{ position: "relative", width: "100%", height: "100%" }}
                 >
                   <img
-                    src={blogData.banner}
+                    src={blogData?.banner?.url || blogData?.banner}
                     alt="Blog banner"
                     style={{
                       width: "100%",
