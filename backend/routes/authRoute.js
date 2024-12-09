@@ -12,6 +12,7 @@ import {
   resetPassword,
   searchUser,
   getUserByUsername,
+  // addLikedPostField,
 } from "../controllers/authControllers.js";
 import passport from "passport";
 import { isAuthenticated } from "../utils/verifyToken.js";
@@ -47,4 +48,5 @@ router.get(
   googleCallback
 );
 
+// router.put("/addlikedpostfield", isAuthenticated, addLikedPostField);
 export default router;

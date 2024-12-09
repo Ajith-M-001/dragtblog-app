@@ -73,6 +73,7 @@ const userSchema = new mongoose.Schema(
       views_this_month: { type: Number, default: 0 },
       last_post_date: { type: Date },
     },
+    likedBlogs: [{ type: mongoose.Schema.Types.ObjectId, ref: "blogs" }],
     blogs: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "blogs",

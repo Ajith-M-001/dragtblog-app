@@ -89,6 +89,13 @@ const blogApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Blog"],
     }),
+    likeBlog: builder.mutation({
+      query: (slug) => ({
+        url: `${BLOG_URL}/like-blog/${slug}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Blog"],
+    }),
   }),
 });
 
@@ -103,4 +110,5 @@ export const {
   useGetBlogBySlugQuery,
   useGetSimilarBlogsQuery,
   useEditBlogMutation,
+  useLikeBlogMutation,
 } = blogApiSlice;

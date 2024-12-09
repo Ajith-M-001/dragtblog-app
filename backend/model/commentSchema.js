@@ -38,6 +38,10 @@ const commentSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    level: {
+      type: Number,
+      default: 0, // 0 for parent comments, 1 for first-level replies, 2 for second-level replies
+    },
   },
   {
     timestamps: true, // Automatically create createdAt and updatedAt fields

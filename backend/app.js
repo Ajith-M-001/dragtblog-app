@@ -12,6 +12,9 @@ import cookieParser from "cookie-parser"; // Add this import
 import blogRoute from "./routes/blogRoute.js";
 import categoryRoute from "./routes/categoryRoute.js";
 import tagRoute from "./routes/tagRoute.js";
+import commentRoute from "./routes/commentRoute.js";
+
+
 // Load environment variables
 dotenv.config();
 
@@ -65,6 +68,7 @@ app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/blog", blogRoute);
 app.use("/api/v1/category", categoryRoute);
 app.use("/api/v1/tag", tagRoute);
+app.use("/api/v1/comment", commentRoute);
 // Catch all undefined routes
 app.use(notFound);
 

@@ -6,6 +6,8 @@ import User from "../model/userSchema.js";
 import ApiError from "../utils/ApiError.js";
 import Category from "../model/categorySchema.js";
 import Tag from "../model/tagSchema.js";
+import mongoose from "mongoose";
+import Notification from "../model/notificationSchema.js";
 
 export const uploadImage = async (req, res, next) => {
   try {
@@ -334,14 +336,20 @@ export const searchBlogs = async (req, res, next) => {
 export const getBlogBySlug = async (req, res, next) => {
   try {
     const { slug } = req.params;
+
+    const { draft, mode } = req.query;
+
+    console.log("dfas", draft, mode);
+
+    const incrementViews = mode === "edit" ? 0 : 1;
     const blog = await Blog.findOneAndUpdate(
       { slug },
-      { $inc: { "blogActivity.total_views": 1 } },
+      { $inc: { "blogActivity.total_views": incrementViews } },
       { new: true }
-    ).populate("author", "profilePicture fullName username");
+    ).populate("author", "profilePicture fullName username likedBlogs");
 
     await User.findByIdAndUpdate(blog.author._id, {
-      $inc: { "account_info.total_reads": 1 },
+      $inc: { "account_info.total_reads": incrementViews },
     });
 
     res
@@ -380,7 +388,7 @@ export const getSimilarBlogs = async (req, res, next) => {
 export const editBlog = async (req, res, next) => {
   try {
     const { slug } = req.params;
-    
+
     const {
       title,
       banner,
@@ -418,6 +426,85 @@ export const editBlog = async (req, res, next) => {
       .status(200)
       .json(ApiResponse.success(updatedBlog, "Blog updated successfully"));
   } catch (error) {
+    next(error);
+  }
+};
+
+export const likeBlog = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { slug } = req.params;
+    const userId = req.user._id;
+
+    const blog = await Blog.findOne({ slug }).populate("author");
+    console.log("blog", blog);
+    if (!blog) {
+      return next(new ApiError("Blog not found", 404));
+    }
+
+    const alreadyLiked = blog.likedBy.includes(userId);
+    if (alreadyLiked) {
+      await Blog.findByIdAndUpdate(blog._id, {
+        $pull: { likedBy: userId },
+        $inc: { "blogActivity.total_likes": -1 },
+      });
+      await User.findByIdAndUpdate(userId, {
+        $pull: { likedBlogs: blog._id },
+      });
+
+      // Remove the like notification if it exists
+
+      await Notification.findOneAndDelete(
+        {
+          recipient: blog.author._id,
+          type: "like",
+          relatedUser: userId,
+          relatedBlog: blog._id,
+        },
+        { session }
+      );
+    } else {
+      await Blog.findByIdAndUpdate(blog._id, {
+        $push: { likedBy: userId },
+        $inc: { "blogActivity.total_likes": 1 },
+      });
+      await User.findByIdAndUpdate(userId, {
+        $push: { likedBlogs: blog._id },
+      });
+
+      // Create a notification for the blog author
+      if (blog.author._id.toString() !== userId.toString()) {
+        await Notification.create(
+          [
+            {
+              recipient: blog.author._id,
+              type: "like",
+              title: "New Blog Like",
+              message: `${req.user.fullName} liked your blog "${blog.title}"`,
+              link: `/blog/${blog.slug}`,
+              relatedUser: userId,
+              relatedBlog: blog._id,
+            },
+          ],
+          { session }
+        );
+      }
+    }
+
+    const customMessage = alreadyLiked ? "unliked" : "liked";
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    res
+      .status(200)
+      .json(ApiResponse.success(null, `Blog ${customMessage} successfully`));
+  } catch (error) {
+    // Abort the transaction
+    await session.abortTransaction();
+    session.endSession();
     next(error);
   }
 };

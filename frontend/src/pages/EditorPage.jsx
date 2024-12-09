@@ -7,23 +7,24 @@ import { AnimatedPage } from "../common/AnimatedPage";
 import { motion } from "framer-motion";
 import { useParams } from "react-router-dom";
 import { useGetBlogBySlugQuery } from "../redux/api/blogApiSlice";
+import axios from "axios";
 
 const EditorPage = () => {
   const { slug } = useParams();
+  console.log("adsfdas", slug);
 
   // Use the refetch option to ensure fresh data is fetched
-  const { data, isLoading, refetch } = useGetBlogBySlugQuery(slug, {
-    refetchOnMountOrArgChange: true, // This will refetch data when the component mounts or the slug changes
-  });
 
-  useEffect(() => {
-    refetch();
-  }, [slug]);
+  // useEffect(() => {
+  //   refetch();
+  // }, [slug]);
 
-  const editorBlogData = data?.data;
-  console.log("editorBlogData after fetching", editorBlogData);
+  // const editorBlogData = data?.data;
+  // console.log("editorBlogData after fetching", editorBlogData);
 
   const [editorState, setEditorState] = useState("editor");
+  const [isLoading, setIsLoading] = useState(false);
+  // const [textEditor, setTextEditor] = useState({ isReady: false });
   const [blogData, setBlogData] = useState({
     title: "",
     banner: null,
@@ -38,25 +39,32 @@ const EditorPage = () => {
     slug: "",
   });
 
-  useEffect(() => {
-    if (editorBlogData) {
-      setBlogData({
-        title: editorBlogData?.title,
-        banner: editorBlogData?.banner?.url,
-        content: editorBlogData?.content,
-        tags: editorBlogData?.tags,
-        categories: editorBlogData?.categories,
-        metaDescription: editorBlogData?.metaDescription,
-        status: editorBlogData?.status,
-        scheduledDate: editorBlogData?.scheduledDate,
-        lastSaved: editorBlogData?.lastSaved,
-        isDirty: false,
-        slug: editorBlogData?.slug,
-      });
-    }
-  }, [editorBlogData, slug]);
-
   console.log("dafds", blogData);
+
+  useEffect(() => {
+    const fetchBlogData = async () => {
+      setIsLoading(true);
+      if (!slug) {
+        setIsLoading(false);
+        return;
+      }
+      try {
+        const { data } = await axios.get(
+          `${
+            import.meta.env.VITE_API_BASE_URL_DEVELOP
+          }/blog/get-blog-by-slug/${slug}?draft=true&mode='edit'`
+        );
+        console.log("datasdafads", data);
+        setBlogData(data?.data);
+      } catch (error) {
+        console.log("error", error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchBlogData();
+  }, [slug]);
 
   useEffect(() => {
     localStorage.setItem("blogDraft", JSON.stringify(blogData));

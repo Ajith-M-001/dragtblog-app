@@ -504,3 +504,98 @@ export const getUserByUsername = async (req, res, next) => {
     next(new ApiError(500, "An error occurred during search"));
   }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// export const addLikedPostField = async (req, res, next) => {
+//   try {
+//     const userId = req.user._id;
+//     await User.findByIdAndUpdate(userId, {
+//       $set: { likedBlogs: [] },
+//     });
+//     res
+//       .status(200)    
+//       .json(
+//         ApiResponse.success(null, "Liked post field added successfully")
+//       );
+//   } catch (error) {
+//     next(new ApiError(500, "An error occurred during adding liked post field"));
+//   }
+// };

@@ -21,18 +21,26 @@ import BlogInteraction from "../components/BlogInteraction";
 import BlogCard from "../components/BlogCard";
 import NoDataFound from "../components/NoDataFound";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect } from "react";
-import { setCurrentBlog } from "../redux/slices/blogSlice";
+import { useEffect, useState } from "react";
+import {
+  selectCommentsWrapper,
+  setCommentsWrapper,
+  setCurrentBlog,
+} from "../redux/slices/blogSlice";
+import CommentsContainer from "../components/CommentsContainer";
+import { Drawer } from "@mui/material"; // Import Drawer
 
 const DetailedBlogPage = () => {
   const { slug } = useParams();
   const theme = useTheme();
   const dispatch = useDispatch();
+  const [isLiked, setIsLiked] = useState(false);
 
   const { data, isLoading } = useGetBlogBySlugQuery(slug);
 
   useEffect(() => {
     dispatch(setCurrentBlog(data?.data));
+    dispatch(setCommentsWrapper(false));
   }, [data, dispatch]);
 
   const { data: similarBlogs, isLoading: similarBlogsLoading } =
@@ -40,6 +48,8 @@ const DetailedBlogPage = () => {
       slug,
       maxLimit: 3,
     });
+
+  const commentsWrapper = useSelector(selectCommentsWrapper);
 
   return (
     <Container maxWidth="md" className="min-height">
@@ -161,7 +171,7 @@ const DetailedBlogPage = () => {
             </Box>
             <Divider />
 
-            <BlogInteraction />
+            <BlogInteraction isLiked={isLiked} setIsLiked={setIsLiked} />
             <Divider />
 
             <BlogComponent />
@@ -180,7 +190,21 @@ const DetailedBlogPage = () => {
 
             <Divider />
 
-            <BlogInteraction />
+            <BlogInteraction isLiked={isLiked} setIsLiked={setIsLiked} />
+
+                <Drawer
+                  anchor="right"
+                  open={commentsWrapper}
+                  onClose={() => dispatch(setCommentsWrapper(!commentsWrapper))} // Close drawer
+                >
+                  <Box
+                    sx={{ width: 450, padding: 2, maxWidth: "100%" }} // Set width and padding
+                    role="presentation"
+                  >
+                    <CommentsContainer />
+                  </Box>
+                </Drawer>
+
             <Divider />
 
             <Box sx={{ my: theme.spacing(4) }}>

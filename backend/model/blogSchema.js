@@ -71,6 +71,12 @@ const blogSchema = new mongoose.Schema(
         ref: "User",
       },
     ],
+    likedBy: [
+      {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
     blogActivity: {
       total_views: {
         type: Number,
