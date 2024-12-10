@@ -58,11 +58,18 @@ export const addComment = async (req, res, next) => {
     await newComment.save({ session });
 
     if (parentCommentId) {
+      await Blog.findOneAndUpdate(
+        { _id: blog._id },
+        {
+          $inc: { "blogActivity.total_replies": 1 },
+          $inc: { "blogActivity.total_comments": 1 },
+        },
+        { session }
+      );
       await Comment.findByIdAndUpdate(
         parentCommentId,
         {
           $push: { replies: newComment._id },
-          //   $inc: { total_replies: 1 },
         },
         { session }
       );
@@ -124,9 +131,13 @@ export const addComment = async (req, res, next) => {
     const commentCount = await Comment.countDocuments({ blog: blog._id });
     newComment.commentCount = commentCount;
 
+    const customComment = parentCommentId ? "reply" : "comment";
+
     res
       .status(200)
-      .json(ApiResponse.success(newComment, "Comment added successfully"));
+      .json(
+        ApiResponse.success(newComment, `${customComment} added successfully`)
+      );
   } catch (error) {
     await session.abortTransaction();
     next(error);
@@ -142,13 +153,29 @@ export const getComments = async (req, res, next) => {
   const limit = parseInt(maxLimit);
   const pageNumber = parseInt(page);
   const sortOrder = sort === "desc" ? -1 : 1;
-  const commentSkip = (page - 1) * limit;
+  const commentSkip = (pageNumber - 1) * limit;
+  console.log("commentSkip", commentSkip);
 
   try {
     const blog = await Blog.findOne({ slug });
     if (!blog) {
       return next(new ApiError(404, "Blog not found"));
     }
+
+    const createPopulateObject = (currentLevel, maxLevel = 5) => {
+      if (currentLevel >= maxLevel) return null;
+
+      return {
+        path: "replies",
+        populate: [
+          {
+            path: "author",
+            select: "username profilePicture",
+          },
+          createPopulateObject(currentLevel + 1, maxLevel),
+        ].filter(Boolean), // Remove null values
+      };
+    };
 
     const comments = await Comment.find({
       blog: blog._id,
@@ -158,13 +185,7 @@ export const getComments = async (req, res, next) => {
       .sort({ createdAt: sortOrder })
       .skip(commentSkip)
       .limit(limit)
-      .populate({
-        path: "replies",
-        populate: {
-          path: "author",
-          select: "username profilePicture",
-        },
-      })
+      .populate(createPopulateObject(0))
       .populate("author", "username profilePicture")
       .lean();
 

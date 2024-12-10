@@ -1,4 +1,11 @@
-import { Box, IconButton, Skeleton, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  IconButton,
+  Skeleton,
+  Typography,
+  useTheme,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -7,7 +14,7 @@ import {
   setCommentsWrapper,
 } from "../redux/slices/blogSlice";
 import CommentField from "./CommentField";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetCommentsQuery } from "../redux/api/commentApiSlice";
 import CommentCard from "./CommentCard";
 
@@ -16,6 +23,9 @@ const CommentsContainer = () => {
   const commentsWrapper = useSelector(selectCommentsWrapper);
   const currentBlog = useSelector(selectCurrentBlog);
   const [page, setPage] = useState(1);
+  const [allComments, setAllComments] = useState([]);
+
+  const theme = useTheme();
 
   const comments = currentBlog?.blogActivity?.total_comments;
   const slug = currentBlog?.slug;
@@ -27,7 +37,28 @@ const CommentsContainer = () => {
     sort: "desc",
   });
 
-  console.log(commentsData);
+  useEffect(() => {
+    if (commentsData?.data?.comments) {
+      if (page === 1) {
+        setAllComments(commentsData.data.comments);
+      } else {
+        // Add only unique comments by checking IDs
+        setAllComments((prev) => {
+          const existingIds = new Set(prev.map((comment) => comment._id));
+          const newComments = commentsData.data.comments.filter(
+            (comment) => !existingIds.has(comment._id)
+          );
+          return [...prev, ...newComments];
+        });
+      }
+    }
+  }, [commentsData, page]);
+
+  console.log("commentsData123", commentsData);
+
+  const handleLoadMore = (commentsData) => {
+    setPage(commentsData?.data?.nextPage);
+  };
 
   return (
     <Box
@@ -71,11 +102,14 @@ const CommentsContainer = () => {
           <Skeleton variant="rectangular" height={100} />
         ) : (
           <Box>
-            {commentsData?.data?.comments &&
-            commentsData?.data?.comments?.length > 0 ? (
-              commentsData?.data?.comments?.map((comment) => (
+            {allComments && allComments?.length > 0 ? (
+              allComments?.map((comment) => (
                 <>
-                  <CommentCard key={comment._id} comment={comment} />
+                  <CommentCard
+                    key={comment._id}
+                    comment={comment}
+                    slug={slug}
+                  />
                 </>
               ))
             ) : (
@@ -84,6 +118,18 @@ const CommentsContainer = () => {
           </Box>
         )}
       </Box>
+      {commentsData?.data?.hasNextPage && (
+        <Box sx={{ px: 2 }}>
+          <Button
+            onClick={() => handleLoadMore(commentsData)}
+            variant="text"
+            size="small"
+            sx={{ color: theme.palette.text.secondary }}
+          >
+            Load more comments
+          </Button>
+        </Box>
+      )}
     </Box>
   );
 };

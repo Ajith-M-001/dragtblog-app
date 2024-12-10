@@ -10,12 +10,24 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import ThumbUpIcon from "@mui/icons-material/ThumbUp";
 import ReplyIcon from "@mui/icons-material/Reply";
+import CommentField from "./CommentField";
+import { useState } from "react";
 
 /* eslint-disable react/prop-types */
-const CommentCard = ({ comment }) => {
+const CommentCard = ({ comment, slug }) => {
   const level = comment?.level;
   const theme = useTheme();
+  const [openReply, setOpenReply] = useState(false);
+  const [showReplies, setShowReplies] = useState(false);
   console.log("dsfasdfsdaf", comment);
+
+  const handleReply = () => {
+    setOpenReply((prev) => !prev);
+  };
+
+  const handleShowReplies = () => {
+    setShowReplies((prev) => !prev);
+  };
 
   return (
     <Box sx={{ p: 2, ml: level * 5 }}>
@@ -57,21 +69,46 @@ const CommentCard = ({ comment }) => {
                 {comment?.likes?.length}
               </Typography>
               <Button
+                onClick={handleShowReplies}
                 variant="text"
                 size="small"
                 sx={{ color: theme.palette.text.secondary }}
+                disabled={comment?.replies?.length === 0}
               >
-                Show replies ({comment?.replies.length})
+                {showReplies
+                  ? "Hide replies"
+                  : `Show replies (${comment?.replies.length})`}
               </Button>
             </Box>
 
-            <IconButton size="small" aria-label="reply">
+            <IconButton
+              onClick={() => handleReply(comment)}
+              size="small"
+              aria-label="reply"
+            >
               <ReplyIcon fontSize="small" />
             </IconButton>
           </Box>
         </Box>
       </Box>
-      <Divider />
+      {openReply && (
+        <CommentField
+          comment={comment}
+          action={"reply"}
+          slug={slug}
+          setOpenReply={setOpenReply}
+        />
+      )}
+
+      {showReplies && comment.replies && comment.replies.length > 0 && (
+        <Box>
+          {comment.replies.map((reply) => (
+            <CommentCard key={reply._id} comment={reply} slug={slug} />
+          ))}
+        </Box>
+      )}
+      {!showReplies && <Divider />}
+      
     </Box>
   );
 };

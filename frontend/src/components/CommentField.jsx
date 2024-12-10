@@ -12,7 +12,12 @@ import { useDispatch, useSelector } from "react-redux";
 import { useCreateCommentMutation } from "../redux/api/commentApiSlice";
 import { showNotification } from "../redux/slices/notificationSlice";
 
-const CommentField = ({ action, slug }) => {
+const CommentField = ({
+  action,
+  slug,
+  comment: replyComment,
+  setOpenReply,
+}) => {
   const theme = useTheme();
   const { userInfo } = useSelector((state) => state.user);
   const MAX_CHARACTERS = 200;
@@ -27,7 +32,7 @@ const CommentField = ({ action, slug }) => {
     }
   };
 
-  const handleAddComment = async (e) => {
+  const handleAddComment = async (e, replyComment) => {
     e.preventDefault();
     if (!userInfo) {
       alert("Please login to add a comment");
@@ -37,7 +42,7 @@ const CommentField = ({ action, slug }) => {
       const res = await createComment({
         blogId: slug,
         comment,
-        parentCommentId: null,
+        parentCommentId: replyComment ? replyComment._id : null,
       }).unwrap();
       console.log("res", res);
       setComment("");
@@ -48,6 +53,7 @@ const CommentField = ({ action, slug }) => {
           severity: res.status,
         })
       );
+      setOpenReply((prev) => !prev);
     } catch (error) {
       console.log(error);
     }
@@ -117,7 +123,7 @@ const CommentField = ({ action, slug }) => {
       </Box>
       <Box sx={{ display: "flex", justifyContent: "flex-end", p: 2 }}>
         <Button
-          onClick={handleAddComment}
+          onClick={(e) => handleAddComment(e, replyComment)}
           size="small"
           disabled={isLoading || comment.trim() === ""}
           variant="contained"
