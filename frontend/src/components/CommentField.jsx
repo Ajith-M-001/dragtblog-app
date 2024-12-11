@@ -9,7 +9,10 @@ import {
 } from "@mui/material";
 import { useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useCreateCommentMutation } from "../redux/api/commentApiSlice";
+import {
+  useCreateCommentMutation,
+  useEditCommentMutation,
+} from "../redux/api/commentApiSlice";
 import { showNotification } from "../redux/slices/notificationSlice";
 
 const CommentField = ({
@@ -17,13 +20,16 @@ const CommentField = ({
   slug,
   comment: replyComment,
   setOpenReply,
+  initialText,
 }) => {
+  console.log("setOpenReply", setOpenReply);
   const theme = useTheme();
+  const [comment, setComment] = useState(initialText || "");
   const { userInfo } = useSelector((state) => state.user);
   const MAX_CHARACTERS = 200;
-  const [comment, setComment] = useState("");
   const dispatch = useDispatch();
   const [createComment, { isLoading }] = useCreateCommentMutation();
+  const [editComment, { isLoading: isEditing }] = useEditCommentMutation();
 
   const handleCommentChange = (e) => {
     const text = e.target.value;
@@ -39,11 +45,19 @@ const CommentField = ({
       return;
     }
     try {
-      const res = await createComment({
-        blogId: slug,
-        comment,
-        parentCommentId: replyComment ? replyComment._id : null,
-      }).unwrap();
+      let res;
+      if (action === "edit") {
+        res = await editComment({
+          commentId: replyComment._id,
+          comment,
+        }).unwrap();
+      } else {
+        res = await createComment({
+          blogId: slug,
+          comment,
+          parentCommentId: replyComment ? replyComment._id : null,
+        }).unwrap();
+      }
       console.log("res", res);
       setComment("");
       dispatch(
@@ -53,9 +67,18 @@ const CommentField = ({
           severity: res.status,
         })
       );
-      setOpenReply((prev) => !prev);
+      if (action !== "comment") {
+        setOpenReply((prev) => !prev);
+      }
     } catch (error) {
       console.log(error);
+      dispatch(
+        showNotification({
+          open: true,
+          message: error?.data?.message || "Something went wrong",
+          severity: "error",
+        })
+      );
     }
   };
 
@@ -125,11 +148,11 @@ const CommentField = ({
         <Button
           onClick={(e) => handleAddComment(e, replyComment)}
           size="small"
-          disabled={isLoading || comment.trim() === ""}
+          disabled={isLoading || isEditing || comment.trim() === ""}
           variant="contained"
           color="primary"
         >
-          add {action}
+          {action === "edit" ? `Save changes` : `Add ${action}`}
         </Button>
       </Box>
     </Box>

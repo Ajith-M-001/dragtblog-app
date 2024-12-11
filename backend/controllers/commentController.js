@@ -172,6 +172,10 @@ export const getComments = async (req, res, next) => {
             path: "author",
             select: "username profilePicture",
           },
+          {
+            path: "blog",
+            select: "author",
+          },
           createPopulateObject(currentLevel + 1, maxLevel),
         ].filter(Boolean), // Remove null values
       };
@@ -187,6 +191,10 @@ export const getComments = async (req, res, next) => {
       .limit(limit)
       .populate(createPopulateObject(0))
       .populate("author", "username profilePicture")
+      .populate({
+        path: "blog",
+        select: "author",
+      })
       .lean();
 
     const totalComments = await Comment.countDocuments({
@@ -213,6 +221,128 @@ export const getComments = async (req, res, next) => {
         ApiResponse.success(responseObject, "Comments fetched successfully")
       );
   } catch (error) {
+    next(error);
+  }
+};
+
+export const editComment = async (req, res, next) => {
+  try {
+    const { commentId } = req.params;
+    const { comment } = req.body;
+    const user = req.user;
+
+    if (!user._id) {
+      return next(new ApiError(400, "User not authenticated"));
+    }
+
+    if (!comment || comment.trim().length === 0) {
+      return next(new ApiError(400, "Comment cannot be empty"));
+    }
+
+    const existingComment = await Comment.findById(commentId);
+    if (!existingComment) {
+      return next(new ApiError(404, "Comment not found"));
+    }
+
+    if (existingComment.author._id.toString() !== user._id.toString()) {
+      return next(
+        new ApiError(403, "You are not authorized to edit this comment")
+      );
+    }
+
+    const editedComment = await Comment.findByIdAndUpdate(
+      commentId,
+      { comment, isEdited: true },
+      { new: true }
+    ).populate("author", "username profilePicture");
+
+    res
+      .status(200)
+      .json(ApiResponse.success(editedComment, "Comment edited successfully"));
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteComment = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { commentId } = req.params;
+    const user = req.user;
+    console.log("user123", user);
+
+    if (!user._id) {
+      return next(new ApiError(400, "User not authenticated"));
+    }
+
+    const existingComment = await Comment.findById(commentId).populate({
+      path: "blog",
+      select: "author",
+    });
+
+    console.log("existingComment", existingComment);
+    if (!existingComment) {
+      return next(new ApiError(404, "Comment not found"));
+    }
+
+    const isCommentAuthor =
+      existingComment.author._id.toString() === user._id.toString();
+    const isBlogAuthor =
+      existingComment.blog.author._id.toString() === user._id.toString();
+    const isAdmin = user.role === "admin";
+
+    if (!isCommentAuthor && !isBlogAuthor && !isAdmin) {
+      return next(
+        new ApiError(403, "You are not authorized to delete this comment")
+      );
+    }
+
+    const blogId = new mongoose.Types.ObjectId(
+      existingComment.blog._id.toString()
+    );
+
+    let deletedCommentsCount = 0; // Counter for tracking total deleted comments
+
+    const deleteRepliesRecursively = async (commentId) => {
+      const comment = await Comment.findById(commentId).session(session);
+      if (!comment) return;
+      // Increment the deleted comments count
+      deletedCommentsCount++;
+
+      if (comment.replies.length > 0) {
+        for (const replyId of comment.replies) {
+          await deleteRepliesRecursively(replyId);
+        }
+      }
+      await Comment.findByIdAndDelete(commentId).session(session);
+    };
+
+    await deleteRepliesRecursively(commentId);
+
+    if (existingComment.parentComment) {
+      await Comment.findByIdAndUpdate(
+        existingComment.parentComment,
+        { $pull: { replies: commentId } },
+        { session }
+      );
+    }
+    // Update the comment count in the associated blog
+    if (blogId) {
+      await Blog.findByIdAndUpdate(
+        blogId,
+        { $inc: { "blogActivity.total_comments": -deletedCommentsCount } }, // Decrease total comments by deleted count
+        { session }
+      );
+    }
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+    res
+      .status(200)
+      .json(ApiResponse.success(null, "Comment deleted successfully"));
+  } catch (error) {
+    await session.abortTransaction();
     next(error);
   }
 };

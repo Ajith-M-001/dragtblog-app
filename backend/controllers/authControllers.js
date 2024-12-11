@@ -13,7 +13,7 @@ import Blog from "../model/blogSchema.js";
 
 export const signup = async (req, res, next) => {
   try {
-    const { fullName, email, password } = req.body;
+    const { fullName, email, password, bio = "" } = req.body;
 
     if (!fullName || !email || !password) {
       return res
@@ -505,85 +505,6 @@ export const getUserByUsername = async (req, res, next) => {
   }
 };
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // export const addLikedPostField = async (req, res, next) => {
 //   try {
 //     const userId = req.user._id;
@@ -591,7 +512,7 @@ export const getUserByUsername = async (req, res, next) => {
 //       $set: { likedBlogs: [] },
 //     });
 //     res
-//       .status(200)    
+//       .status(200)
 //       .json(
 //         ApiResponse.success(null, "Liked post field added successfully")
 //       );

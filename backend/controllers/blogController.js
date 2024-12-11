@@ -50,6 +50,11 @@ export const publishBlog = async (req, res, next) => {
       return next(new ApiError("Title, banner, and content are required", 400));
     }
 
+    //once user publishers a blog then change user role to author
+    // await User.findByIdAndUpdate(req.user._id, {
+    //   $set: { role: "author" },
+    // });
+
     if (status === "scheduled" && !scheduledDate) {
       return next(
         new ApiError("Scheduled date is required for scheduled posts", 400)
