@@ -74,7 +74,16 @@ export const addComment = async (req, res, next) => {
         { session }
       );
 
-      if (newComment.author._id.toString() !== user._id.toString()) {
+      const parentComment = await Comment.findById(parentCommentId).populate(
+        "author"
+      );
+
+      if (
+        parentComment &&
+        parentComment.author.toString() !== user._id.toString()
+      ) {
+        console.log("newComment.author._id", parentComment.author._id);
+        console.log("user._id", user._id);
         await Notification.create(
           [
             {
@@ -309,6 +318,11 @@ export const deleteComment = async (req, res, next) => {
       if (!comment) return;
       // Increment the deleted comments count
       deletedCommentsCount++;
+
+      // Delete related notifications
+      await Notification.deleteMany({
+        relatedComment: commentId,
+      }).session(session);
 
       if (comment.replies.length > 0) {
         for (const replyId of comment.replies) {
