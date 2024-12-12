@@ -505,6 +505,46 @@ export const getUserByUsername = async (req, res, next) => {
   }
 };
 
+export const changePassword = async (req, res, next) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    
+    // Password validation regex
+    const passwordValidation = {
+      minLength: newPassword.length >= 8,
+      hasNumber: /[0-9]/.test(newPassword),
+      hasLowercase: /[a-z]/.test(newPassword),
+      hasUppercase: /[A-Z]/.test(newPassword),
+      hasSymbol: /[^\w]/.test(newPassword)
+    };
+
+    // Check if any validation fails
+    const validationErrors = [];
+    if (!passwordValidation.minLength) validationErrors.push("Password must be at least 8 characters");
+    if (!passwordValidation.hasNumber) validationErrors.push("Password requires at least one number");
+    if (!passwordValidation.hasLowercase) validationErrors.push("Password requires at least one lowercase letter");
+    if (!passwordValidation.hasUppercase) validationErrors.push("Password requires at least one uppercase letter");
+    if (!passwordValidation.hasSymbol) validationErrors.push("Password requires at least one symbol");
+
+    if (validationErrors.length > 0) {
+      return res.status(400).json(ApiResponse.error(validationErrors.join(", "), 400));
+    }
+
+    const userId = req.user._id;
+    const user = await User.findById(userId);
+    const isPasswordValid = await bcrypt.compare(currentPassword, user.password);
+    if (!isPasswordValid) {
+      return res.status(401).json(ApiResponse.error("Invalid current password", 401));
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 11);
+    await User.findByIdAndUpdate(userId, { $set: { password: hashedPassword } });
+    res.status(200).json(ApiResponse.success(null, "Password changed successfully", 200));
+  } catch (error) {
+    next(new ApiError(500, "An error occurred during change password"));
+  }
+};
+
 // export const addLikedPostField = async (req, res, next) => {
 //   try {
 //     const userId = req.user._id;

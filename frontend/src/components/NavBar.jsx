@@ -26,6 +26,8 @@ import { logout } from "../redux/slices/userSlice";
 import { showNotification } from "../redux/slices/notificationSlice";
 import { Button, Container } from "@mui/material";
 import { useState } from "react";
+import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
+import SettingsIcon from "@mui/icons-material/Settings";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -128,6 +130,7 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
+    navigate("/setting");
     // handleMobileMenuClose();
   };
 
@@ -169,6 +172,14 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
       <MenuItem onClick={handleMenuClose}>
         <PersonOutlineIcon sx={{ marginRight: theme.spacing(5) }} />
         Profile
+      </MenuItem>
+      <MenuItem onClick={handleMenuClose}>
+        <SpaceDashboardIcon sx={{ marginRight: theme.spacing(5) }} />
+        DashBoard
+      </MenuItem>
+      <MenuItem onClick={handleMenuClose}>
+        <SettingsIcon sx={{ marginRight: theme.spacing(5) }} />
+        Setting
       </MenuItem>
       <MenuItem onClick={handleLogout}>
         <LogoutIcon sx={{ marginRight: theme.spacing(5) }} />

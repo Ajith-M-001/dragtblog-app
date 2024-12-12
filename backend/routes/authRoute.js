@@ -12,6 +12,7 @@ import {
   resetPassword,
   searchUser,
   getUserByUsername,
+  changePassword,
   // addLikedPostField,
 } from "../controllers/authControllers.js";
 import passport from "passport";
@@ -32,6 +33,7 @@ router.get("/getUser/:username", getUserByUsername);
 router.post("/forgot-password", forgotPassword);
 router.post("/verify-reset-otp", verifyResetOTP);
 router.put("/reset-password", resetPassword);
+router.put("/change-password", isAuthenticated, changePassword);
 
 router.get(
   "/google",

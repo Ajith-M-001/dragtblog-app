@@ -20,6 +20,9 @@ import NotFoundPage from "./components/NotFoundPage";
 import ProfilePage from "./pages/ProfilePage";
 import Search from "./pages/Search";
 import DetailedBlogPage from "./pages/DetailedBlogPage";
+import SideNavBar from "./components/SideNavBar";
+import EditProfile from "./components/EditProfile";
+import ChangePassword from "./components/ChangePassword";
 
 const useThemeMode = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -90,6 +93,10 @@ const App = () => {
             <Route path="profile/:username" element={<ProfilePage />} />
             <Route path="blog/:slug" element={<DetailedBlogPage />} />
             <Route path="*" element={<NotFoundPage />} /> {/* Add this line */}
+            <Route path="setting" element={<SideNavBar />}>
+              <Route path="edit-profile" element={<EditProfile />} />
+              <Route path="change-password" element={<ChangePassword />} />
+            </Route>
           </Route>
           <Route path="editor" element={<EditorPage />} />
           <Route path="editor/:slug" element={<EditorPage />} />
