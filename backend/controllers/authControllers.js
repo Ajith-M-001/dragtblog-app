@@ -545,6 +545,44 @@ export const changePassword = async (req, res, next) => {
   }
 };
 
+export const updateProfile = async (req, res, next) => {
+  try {
+    const { profilePicture, fullName, bio, social_links, username } = req.body;
+    const userId = req.user._id;
+
+    // Validate that the user exists
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json(ApiResponse.error("User not found", 404));
+    }
+
+    // Prepare the fields to update dynamically, so we only update those that are present in the request
+    const updateData = {};
+    if (profilePicture !== undefined)
+      updateData.profilePicture = profilePicture;
+    if (fullName !== undefined) updateData.fullName = fullName;
+    if (bio !== undefined) updateData.bio = bio;
+    if (social_links !== undefined) updateData.social_links = social_links;
+    if (username !== undefined) updateData.username = username;
+
+    // Update the user profile
+    const updatedUser = await User.findByIdAndUpdate(
+      userId,
+      { $set: updateData },
+      { new: true }
+    );
+
+    return res
+      .status(200)
+      .json(
+        ApiResponse.success(updatedUser, "Profile updated successfully", 200)
+      );
+  } catch (error) {
+    next(new ApiError(500, "An error occurred during profile update"));
+  }
+};
+
+
 // export const addLikedPostField = async (req, res, next) => {
 //   try {
 //     const userId = req.user._id;

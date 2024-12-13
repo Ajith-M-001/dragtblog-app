@@ -13,6 +13,7 @@ import {
   searchUser,
   getUserByUsername,
   changePassword,
+  updateProfile,
   // addLikedPostField,
 } from "../controllers/authControllers.js";
 import passport from "passport";
@@ -29,6 +30,7 @@ router.post("/resend-otp", resendOTP);
 router.get("/user/profile", isAuthenticated, getUserProfile);
 router.get("/search-user", searchUser);
 router.get("/getUser/:username", getUserByUsername);
+router.put("/update-profile", isAuthenticated, updateProfile);
 
 router.post("/forgot-password", forgotPassword);
 router.post("/verify-reset-otp", verifyResetOTP);
