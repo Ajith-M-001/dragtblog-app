@@ -41,11 +41,11 @@ import PersonIcon from "@mui/icons-material/Person";
 import LockIcon from "@mui/icons-material/Lock";
 
 const navigationItems = [
-  { text: "Blogs", icon: <ArticleIcon />, path: "/blogs" },
+  { text: "Blogs", icon: <ArticleIcon />, path: "/dashboard/blogs" },
   {
     text: "Notifications",
     icon: <NotificationsIcon />,
-    path: "/notifications",
+    path: "/dashboard/notification",
   },
   { text: "Write", icon: <EditNoteIcon />, path: "/editor" },
 ];

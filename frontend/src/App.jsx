@@ -23,6 +23,8 @@ import DetailedBlogPage from "./pages/DetailedBlogPage";
 import SideNavBar from "./components/SideNavBar";
 import EditProfile from "./components/EditProfile";
 import ChangePassword from "./components/ChangePassword";
+import NotificationPage from "./pages/NotificationPage";
+import DashboardBlogsPage from "./pages/DashboardBlogsPage";
 
 const useThemeMode = () => {
   const [isDarkMode, setIsDarkMode] = useState(true);
@@ -92,11 +94,16 @@ const App = () => {
             <Route path="search" element={<Search />} />
             <Route path="profile/:username" element={<ProfilePage />} />
             <Route path="blog/:slug" element={<DetailedBlogPage />} />
-            <Route path="*" element={<NotFoundPage />} /> 
+            <Route path="*" element={<NotFoundPage />} />
             <Route path="setting" element={<SideNavBar />}>
               <Route path="edit-profile" element={<EditProfile />} />
               <Route path="change-password" element={<ChangePassword />} />
               <Route index element={<Navigate to="edit-profile" />} />
+            </Route>
+            <Route path="dashboard" element={<SideNavBar />}>
+              <Route path="notification" element={<NotificationPage />} />
+              <Route path="blogs" element={<DashboardBlogsPage />} />
+              <Route index element={<Navigate to="blogs" />} />
             </Route>
           </Route>
           <Route path="editor" element={<EditorPage />} />

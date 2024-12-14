@@ -85,7 +85,6 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
 
   const { data: newNotification } = useGetNewNotificationQuery();
 
-
   const [anchorEl, setAnchorEl] = useState(null);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   // const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
@@ -134,13 +133,27 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    navigate(`/profile/${userInfo.username}`);
     // handleMobileMenuClose();
+  };
+
+  const handleProfileNavigation = () => {
+    navigate(`/profile/${userInfo.username}`);
+    setAnchorEl(null);
   };
 
   // const handleMobileMenuOpen = (event) => {
   //   setMobileMoreAnchorEl(event.currentTarget);
   // };
+
+  const handleSettingNavigation = () => {
+    navigate("/setting/edit-profile");
+    setAnchorEl(null);
+  };
+
+  const handleDashboardNavigation = () => {
+    navigate("/dashboard");
+    setAnchorEl(null);
+  };
 
   const menuId = "primary-search-account-menu";
   const renderMenu = (
@@ -173,15 +186,15 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
         />
         Write
       </MenuItem>
-      <MenuItem onClick={handleMenuClose}>
+      <MenuItem onClick={handleProfileNavigation}>
         <PersonOutlineIcon sx={{ marginRight: theme.spacing(5) }} />
         Profile
       </MenuItem>
-      <MenuItem onClick={handleMenuClose}>
+      <MenuItem onClick={handleDashboardNavigation}>
         <SpaceDashboardIcon sx={{ marginRight: theme.spacing(5) }} />
         DashBoard
       </MenuItem>
-      <MenuItem onClick={handleMenuClose}>
+      <MenuItem onClick={handleSettingNavigation}>
         <SettingsIcon sx={{ marginRight: theme.spacing(5) }} />
         Setting
       </MenuItem>
@@ -388,23 +401,31 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
                   </Box>
                 ) : (
                   <>
-                    <IconButton
-                      size="large"
-                      aria-label="new_notifications"
-                      color="inherit"
-                      sx={{
-                        "& .MuiSvgIcon-root": {
-                          fontSize: {
-                            xs: theme.typography.fontSizes.xl,
-                            sm: theme.typography.fontSizes["2xl"],
-                          },
-                        },
-                      }}
+                    <Box
+                      sx={{ textDecoration: "none" }}
+                      component={Link}
+                      to="/dashboard/notification"
                     >
-                      <Badge badgeContent={newNotification?.data} color="error">
-                        <NotificationsOutlinedIcon />
-                      </Badge>
-                    </IconButton>
+                      <IconButton
+                        size="large"
+                        aria-label="new_notifications"
+                        sx={{
+                          "& .MuiSvgIcon-root": {
+                            fontSize: {
+                              xs: theme.typography.fontSizes.xl,
+                              sm: theme.typography.fontSizes["2xl"],
+                            },
+                          },
+                        }}
+                      >
+                        <Badge
+                          badgeContent={newNotification?.data}
+                          color="error"
+                        >
+                          <NotificationsOutlinedIcon />
+                        </Badge>
+                      </IconButton>
+                    </Box>
                     <IconButton
                       size="large"
                       edge="end"
