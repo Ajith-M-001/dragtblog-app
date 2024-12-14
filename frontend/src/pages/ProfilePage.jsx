@@ -7,7 +7,7 @@ import {
   Skeleton,
   Typography,
 } from "@mui/material";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetUserByUsernameQuery } from "../redux/api/userApiSlice";
 import EditIcon from "@mui/icons-material/Edit";
 import { useSelector } from "react-redux";
@@ -18,6 +18,7 @@ const ProfilePage = () => {
   const { username } = useParams();
   const [page, setPage] = useState(1);
   const [blogs, setBlogs] = useState([]);
+  const navigate = useNavigate();
   const [hasMore, setHasMore] = useState(false);
   const maxLimit = 5;
 
@@ -60,7 +61,6 @@ const ProfilePage = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, [hasMore, isLoading]);
 
-
   const {
     fullName,
     profilePicture,
@@ -70,7 +70,7 @@ const ProfilePage = () => {
   } = data?.data || {};
 
   return (
-    <Container maxWidth="xl" className="min-height">
+    <Container maxWidth="xl" className="min-height" sx={{ mt: 15 }}>
       <Grid container>
         <Grid
           item
@@ -145,6 +145,7 @@ const ProfilePage = () => {
                 </Box>
                 {uniqueUsername === userInfo?.username && (
                   <Button
+                    onClick={() => navigate("/setting/edit-profile")}
                     variant="text"
                     sx={{
                       mt: 2,

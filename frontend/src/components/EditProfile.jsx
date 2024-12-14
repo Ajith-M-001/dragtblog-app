@@ -2,6 +2,7 @@ import {
   Avatar,
   Box,
   Button,
+  CircularProgress,
   Container,
   Grid,
   Typography,
@@ -31,7 +32,7 @@ const EditProfile = () => {
   const imageRef = useRef(null);
   const dispatch = useDispatch();
   const [updateProfile, { isLoading }] = useUpdateProfileMutation();
-  const [uploadImage, { isLoading: isUploading }] = useUploadBannerMutation              ();
+  const [uploadImage, { isLoading: isUploading }] = useUploadBannerMutation();
 
   let initialValues = {
     profilePicture: "",
@@ -91,9 +92,33 @@ const EditProfile = () => {
     bio: yup.string().max(150, "Bio must be less than 150 characters"),
   });
 
+  const handleImageUpload = async (e, setFieldValue) => {
+    const file = e.target.files[0];
+    console.log("file", file);
+    const formData = new FormData();
+    formData.append("image", file);
+    console.log("formData", formData);
+    try {
+      const res = await uploadImage(formData).unwrap();
+      console.log("res", res);
+      setFieldValue("profilePicture", res.data.secure_url);
+      dispatch(
+        showNotification({
+          open: true,
+          message: res.message || "Profile picture updated successfully",
+          type: res.status,
+        })
+      );
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   return (
-    <Container sx={{ overflowX: "auto" }}>
-      <Typography variant="h6">Edit Profile</Typography>
+    <Container sx={{ mt: 15 }}>
+      <Typography variant="h6" sx={{ textAlign: "center" }}>
+        Edit Profile
+      </Typography>
 
       <Formik
         initialValues={initialValues}
@@ -108,6 +133,7 @@ const EditProfile = () => {
           handleBlur,
           errors,
           touched,
+          setFieldValue,
         }) => (
           <Form>
             <Grid container sx={{ mt: 3 }}>
@@ -118,25 +144,37 @@ const EditProfile = () => {
                 sx={{ display: "flex", justifyContent: "center" }}
               >
                 <Box sx={{ position: "relative", width: 120, height: 120 }}>
-                  <Avatar
-                    src={values.profilePicture}
-                    sx={{
-                      width: 120,
-                      height: 120,
-                      cursor: "pointer",
-                    }}
-                  />
+                  {isUploading ? (
+                    <Box
+                      sx={{
+                        width: 120,
+                        height: 120,
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        borderRadius: "50%",
+                        backgroundColor: "rgba(0, 0, 0, 0.6)",
+                      }}
+                    >
+                      <CircularProgress />
+                    </Box>
+                  ) : (
+                    <Avatar
+                      src={values.profilePicture}
+                      sx={{
+                        width: 120,
+                        height: 120,
+                        cursor: "pointer",
+                      }}
+                    />
+                  )}
                   <input
                     ref={imageRef}
                     type="file"
                     hidden
                     accept=".jpg, .jpeg, .png"
-                    onChange={(e) => {
-                      const file = e.target.files[0];
-                      console.log("file", file);
-                    }}
+                    onChange={(e) => handleImageUpload(e, setFieldValue)}
                   />
-
                   <Box
                     onClick={() => imageRef.current.click()}
                     sx={{

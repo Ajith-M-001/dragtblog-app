@@ -3,7 +3,7 @@ import "./App.css";
 import PrimarySearchAppBar from "./components/NavBar";
 import { CssBaseline, ThemeProvider } from "@mui/material";
 import { darkTheme, lightTheme } from "./common/theme";
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import UserAuthForm from "./pages/UserAuthForm";
 import Homepage from "./pages/Homepage";
 import VerifyOTPForm from "./components/VerifyOTPForm";
@@ -92,10 +92,11 @@ const App = () => {
             <Route path="search" element={<Search />} />
             <Route path="profile/:username" element={<ProfilePage />} />
             <Route path="blog/:slug" element={<DetailedBlogPage />} />
-            <Route path="*" element={<NotFoundPage />} /> {/* Add this line */}
+            <Route path="*" element={<NotFoundPage />} /> 
             <Route path="setting" element={<SideNavBar />}>
               <Route path="edit-profile" element={<EditProfile />} />
               <Route path="change-password" element={<ChangePassword />} />
+              <Route index element={<Navigate to="edit-profile" />} />
             </Route>
           </Route>
           <Route path="editor" element={<EditorPage />} />

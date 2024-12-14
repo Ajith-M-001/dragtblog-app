@@ -13,6 +13,7 @@ import blogRoute from "./routes/blogRoute.js";
 import categoryRoute from "./routes/categoryRoute.js";
 import tagRoute from "./routes/tagRoute.js";
 import commentRoute from "./routes/commentRoute.js";
+import notificationRoute from "./routes/notificationRoute.js";
 
 
 // Load environment variables
@@ -69,6 +70,7 @@ app.use("/api/v1/blog", blogRoute);
 app.use("/api/v1/category", categoryRoute);
 app.use("/api/v1/tag", tagRoute);
 app.use("/api/v1/comment", commentRoute);
+app.use("/api/v1/notification", notificationRoute);
 // Catch all undefined routes
 app.use(notFound);
 

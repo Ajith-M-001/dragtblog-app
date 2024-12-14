@@ -28,6 +28,7 @@ import { Button, Container } from "@mui/material";
 import { useState } from "react";
 import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
 import SettingsIcon from "@mui/icons-material/Settings";
+import { useGetNewNotificationQuery } from "../redux/api/notificationApiSlice";
 
 const Search = styled("div")(({ theme }) => ({
   position: "relative",
@@ -82,6 +83,9 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
     }
   };
 
+  const { data: newNotification } = useGetNewNotificationQuery();
+
+
   const [anchorEl, setAnchorEl] = useState(null);
   const [showMobileSearch, setShowMobileSearch] = useState(false);
   // const [mobileMoreAnchorEl, setMobileMoreAnchorEl] = React.useState(null);
@@ -130,7 +134,7 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-    navigate("/setting");
+    navigate(`/profile/${userInfo.username}`);
     // handleMobileMenuClose();
   };
 
@@ -244,7 +248,7 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
   return (
     <>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="static" color="inherit" elevation={0}>
+        <AppBar position="fixed" color="inherit" elevation={0}>
           <Container maxWidth="xl">
             <Toolbar
               sx={{
@@ -386,7 +390,7 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
                   <>
                     <IconButton
                       size="large"
-                      aria-label="show 17 new notifications"
+                      aria-label="new_notifications"
                       color="inherit"
                       sx={{
                         "& .MuiSvgIcon-root": {
@@ -397,7 +401,7 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
                         },
                       }}
                     >
-                      <Badge badgeContent={17} color="error">
+                      <Badge badgeContent={newNotification?.data} color="error">
                         <NotificationsOutlinedIcon />
                       </Badge>
                     </IconButton>
@@ -426,7 +430,7 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
                             width: "35px", // Adjust size as needed
                             height: "35px",
                             borderRadius: "50%", // Make it circular
-                            objectFit: "contain",
+                            objectFit: "cover",
                           }}
                         />
                       ) : (

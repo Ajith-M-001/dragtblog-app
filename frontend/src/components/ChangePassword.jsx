@@ -69,6 +69,7 @@ const ChangePassword = () => {
         mx: "auto",
         p: 3,
         borderRadius: 2,
+        mt: 15,
       }}
     >
       <Typography
