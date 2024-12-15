@@ -10,21 +10,21 @@ export const commentApiSlice = apiSlice.injectEndpoints({
         method: "POST",
         body: { comment, parentCommentId },
       }),
-      invalidatesTags: ["Comment"],
+      invalidatesTags: ["Comment", "Notification"],
     }),
     getComments: builder.query({
       query: ({ blogId, maxLimit, page, sort }) => ({
         url: `${COMMENTS_URL}/get-comments/${blogId}`,
         params: { maxLimit, page, sort },
       }),
-      providesTags: ["Comment"],
+      providesTags: ["Comment", "Notification"],
     }),
     deleteComment: builder.mutation({
       query: ({ commentId }) => ({
         url: `${COMMENTS_URL}/delete-comment/${commentId}`,
         method: "DELETE",
       }),
-      invalidatesTags: ["Comment"],
+      invalidatesTags: ["Comment", "Notification"],
     }),
     editComment: builder.mutation({
       query: ({ commentId, comment }) => ({
@@ -32,7 +32,7 @@ export const commentApiSlice = apiSlice.injectEndpoints({
         method: "PUT",
         body: { comment },
       }),
-      invalidatesTags: ["Comment"],
+      invalidatesTags: ["Comment", "Notification"],
     }),
   }),
 });

@@ -21,7 +21,7 @@ import BlogInteraction from "../components/BlogInteraction";
 import BlogCard from "../components/BlogCard";
 import NoDataFound from "../components/NoDataFound";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   selectCommentsWrapper,
   setCommentsWrapper,
@@ -35,6 +35,7 @@ const DetailedBlogPage = () => {
   const theme = useTheme();
   const dispatch = useDispatch();
   const [isLiked, setIsLiked] = useState(false);
+  const [highlightedComment, setHighlightedComment] = useState(null);
 
   const { data, isLoading } = useGetBlogBySlugQuery(slug);
 
@@ -43,6 +44,15 @@ const DetailedBlogPage = () => {
     dispatch(setCommentsWrapper(false));
   }, [data, dispatch]);
 
+  useEffect(() => {
+    const hash = window.location.hash;
+    if (hash) {
+      dispatch(setCommentsWrapper(true));
+      setHighlightedComment(hash.replace("#commentId-", ""));
+    }
+  }, [dispatch]);
+
+  console.log("hash_123", highlightedComment);
   const { data: similarBlogs, isLoading: similarBlogsLoading } =
     useGetSimilarBlogsQuery({
       slug,
@@ -192,18 +202,18 @@ const DetailedBlogPage = () => {
 
             <BlogInteraction isLiked={isLiked} setIsLiked={setIsLiked} />
 
-                <Drawer
-                  anchor="right"
-                  open={commentsWrapper}
-                  onClose={() => dispatch(setCommentsWrapper(!commentsWrapper))} // Close drawer
-                >
-                  <Box
-                    sx={{ width: 450, padding: 2, maxWidth: "100%" }} // Set width and padding
-                    role="presentation"
-                  >
-                    <CommentsContainer />
-                  </Box>
-                </Drawer>
+            <Drawer
+              anchor="right"
+              open={commentsWrapper}
+              onClose={() => dispatch(setCommentsWrapper(!commentsWrapper))} // Close drawer
+            >
+              <Box
+                sx={{ width: 450, padding: 2, maxWidth: "100%" }} // Set width and padding
+                role="presentation"
+              >
+                <CommentsContainer highlightedComment={highlightedComment} />
+              </Box>
+            </Drawer>
 
             <Divider />
 

@@ -25,7 +25,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { logout } from "../redux/slices/userSlice";
 import { showNotification } from "../redux/slices/notificationSlice";
 import { Button, Container } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SpaceDashboardIcon from "@mui/icons-material/SpaceDashboard";
 import SettingsIcon from "@mui/icons-material/Settings";
 import { useGetNewNotificationQuery } from "../redux/api/notificationApiSlice";
@@ -83,7 +83,12 @@ export default function PrimarySearchAppBar({ toggleTheme, isDarkMode }) {
     }
   };
 
-  const { data: newNotification } = useGetNewNotificationQuery();
+  const { data: newNotification, refetch: refetchNewNotification } =
+    useGetNewNotificationQuery();
+
+  useEffect(() => {
+    refetchNewNotification();
+  }, [refetchNewNotification]);
 
   const [anchorEl, setAnchorEl] = useState(null);
   const [showMobileSearch, setShowMobileSearch] = useState(false);

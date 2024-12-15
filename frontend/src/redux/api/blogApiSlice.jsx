@@ -96,6 +96,14 @@ const blogApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Blog"],
     }),
+    userWrittenBlogs: builder.query({
+      query: (query) => ({
+        url: `${BLOG_URL}/user-written-blogs`,
+        method: "GET",
+        params: query,
+      }),
+      providesTags: ["Blog"],
+    }),
   }),
 });
 
@@ -111,4 +119,5 @@ export const {
   useGetSimilarBlogsQuery,
   useEditBlogMutation,
   useLikeBlogMutation,
+  useUserWrittenBlogsQuery,
 } = blogApiSlice;

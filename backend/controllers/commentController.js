@@ -75,27 +75,46 @@ export const addComment = async (req, res, next) => {
       );
 
       const parentComment = await Comment.findById(parentCommentId).populate(
-        "author"
+        "author",
+        "username profilePicture fullName email _id"
       );
+
+      console.log("parentComment_123", parentComment);
 
       if (
         parentComment &&
-        parentComment.author.toString() !== user._id.toString()
+        parentComment.author._id.toString() !== user._id.toString()
       ) {
         console.log("newComment.author._id", parentComment.author._id);
         console.log("user._id", user._id);
         await Notification.create(
           [
             {
-              recipient: newComment.author._id,
+              recipient: parentComment.author._id,
               type: "reply",
               title: "New Reply on Your Comment",
               message: `${user.fullName} replied to your comment on "${blog.title}"`,
-              link: `/blog/${blog.slug}`,
+              link: `/blog/${blog.slug}#commentId-${newComment._id}`, // Updated link
               relatedUser: user._id,
               relatedBlog: blog._id,
               relatedComment: newComment._id,
             },
+            ...(parentComment.author._id.toString() !==
+              blog.author._id.toString() &&
+            blog.author._id.toString() !== user._id.toString()
+              ? [
+                  {
+                    recipient: blog.author._id,
+                    type: "reply",
+                    title: "New Reply on Your Blog",
+                    message: `${user.fullName} replied to a comment on your blog "${blog.title}"`,
+                    link: `/blog/${blog.slug}#commentId-${newComment._id}`, // Updated link
+                    relatedUser: user._id,
+                    relatedBlog: blog._id,
+                    relatedComment: newComment._id,
+                  },
+                ]
+              : []),
           ],
           { session }
         );

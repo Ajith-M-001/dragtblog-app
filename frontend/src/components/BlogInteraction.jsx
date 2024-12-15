@@ -32,8 +32,7 @@ const BlogInteraction = () => {
   const dispatch = useDispatch();
   const commentsWrapper = useSelector(selectCommentsWrapper);
 
-
-  // need to handle this from backend 
+  // need to handle this from backend
   useEffect(() => {
     console.log("current", currentBlog);
     if (currentBlog) {

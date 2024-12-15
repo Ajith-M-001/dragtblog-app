@@ -147,9 +147,8 @@ const UserAuthForm = ({ type }) => {
 
   return (
     <AnimatedPage>
-      <Container component="main" maxWidth="sm">
+      <Container className="min-height " component="main" maxWidth="sm">
         <Box
-          className="min-height "
           sx={{
             display: "flex",
             justifyContent: "center",

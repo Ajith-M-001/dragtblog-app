@@ -513,3 +513,51 @@ export const likeBlog = async (req, res, next) => {
     next(error);
   }
 };
+
+export const userWrittenBlogs = async (req, res, next) => {
+  try {
+    const id = req.user._id;
+    const { maxLimit = 5, page = 1, order = "desc", status, title } = req.query;
+    const pageNumber = parseInt(page) || 1;
+    const limit = parseInt(maxLimit) || 5;
+    const skip = (pageNumber - 1) * limit;
+
+    const query = { author: id };
+    if (status) {
+      query.status = status;
+    }
+    if (title) {
+      query.title = { $regex: title, $options: "i" };
+    }
+
+    const blogs = await Blog.find(query)
+      .sort({ createdAt: order === "desc" ? -1 : 1 })
+      .skip(skip)
+      .limit(limit)
+      .select(
+        "title slug banner categories createdAt metaDescription blogActivity "
+      )
+      .populate("author", "profilePicture fullName username");
+
+    const totalBlogs = await Blog.countDocuments(query);
+    const totalPages = Math.ceil(totalBlogs / limit);
+    const hasNextPage = pageNumber < totalPages;
+
+    const responseObject = {
+      blogs,
+      pagination: {
+        currentPage: pageNumber,
+        totalPages,
+        totalBlogs,
+        hasNextPage,
+        nextPage: hasNextPage ? pageNumber + 1 : null,
+      },
+    };
+
+    res
+      .status(200)
+      .json(ApiResponse.success(responseObject, "Blogs fetched successfully"));
+  } catch (error) {
+    next(error);
+  }
+};

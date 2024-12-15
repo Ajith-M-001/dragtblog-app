@@ -12,6 +12,7 @@ import {
   getSimilarBlogs,
   likeBlog,
   editBlog,
+  userWrittenBlogs,
 } from "../controllers/blogController.js";
 import { isAuthenticated } from "../utils/verifyToken.js";
 
@@ -29,5 +30,6 @@ router.get("/get-blog-by-slug/:slug", getBlogBySlug);
 router.get("/get-similar-blogs/:slug", getSimilarBlogs);
 router.put("/edit-blog/:slug", isAuthenticated, editBlog);
 router.put("/like-blog/:slug", isAuthenticated, likeBlog);
+router.get("/user-written-blogs", isAuthenticated, userWrittenBlogs);
 
 export default router;

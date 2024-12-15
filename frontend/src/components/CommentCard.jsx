@@ -36,7 +36,7 @@ const CommentCard = ({ comment, slug }) => {
 
   const isCommentAuthor = comment?.author?._id === userInfo?._id;
   const isBlogAuthor = comment?.blog?.author === userInfo?._id;
-  const isAdmin = userInfo.role === "admin" ? true : false;
+  const isAdmin = userInfo?.role === "admin" ? true : false;
 
   const handleReply = () => {
     setOpenReply((prev) => !prev);
