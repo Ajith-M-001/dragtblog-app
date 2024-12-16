@@ -13,6 +13,7 @@ import {
   likeBlog,
   editBlog,
   userWrittenBlogs,
+  deleteBlog,
 } from "../controllers/blogController.js";
 import { isAuthenticated } from "../utils/verifyToken.js";
 
@@ -31,5 +32,6 @@ router.get("/get-similar-blogs/:slug", getSimilarBlogs);
 router.put("/edit-blog/:slug", isAuthenticated, editBlog);
 router.put("/like-blog/:slug", isAuthenticated, likeBlog);
 router.get("/user-written-blogs", isAuthenticated, userWrittenBlogs);
+router.delete("/delete-blogs/:id", isAuthenticated , deleteBlog);
 
 export default router;

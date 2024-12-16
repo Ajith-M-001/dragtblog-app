@@ -104,6 +104,13 @@ const blogApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["Blog"],
     }),
+    deleteBlog: builder.mutation({
+      query: (id) => ({
+        url: `${BLOG_URL}/delete-blogs/${id}`,
+        method: "DELETE",
+      }),
+      invalidatesTags: ["Blog"],
+    }),
   }),
 });
 
@@ -120,4 +127,5 @@ export const {
   useEditBlogMutation,
   useLikeBlogMutation,
   useUserWrittenBlogsQuery,
+  useDeleteBlogMutation,
 } = blogApiSlice;

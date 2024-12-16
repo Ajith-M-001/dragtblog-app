@@ -8,6 +8,7 @@ import Category from "../model/categorySchema.js";
 import Tag from "../model/tagSchema.js";
 import mongoose from "mongoose";
 import Notification from "../model/notificationSchema.js";
+import Comment from "../model/commentSchema.js";
 
 export const uploadImage = async (req, res, next) => {
   try {
@@ -558,6 +559,68 @@ export const userWrittenBlogs = async (req, res, next) => {
       .status(200)
       .json(ApiResponse.success(responseObject, "Blogs fetched successfully"));
   } catch (error) {
+    next(error);
+  }
+};
+
+export const deleteBlog = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const blogId = req.params.id;
+    const blog = await Blog.findById(blogId).session(session);
+
+    if (!blog) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: "Blog not found" });
+    }
+
+    await Comment.deleteMany({ blog: blogId }).session(session);
+    await Notification.deleteMany({ relatedBlog: blogId }).session(session);
+
+    await User.updateMany(
+      {},
+      {
+        $pull: {
+          blogs: blogId,
+          bookmarks: blogId,
+          publishedPosts: blogId,
+        },
+      },
+      { session }
+    );
+
+    await Category.findOneAndUpdate(
+      { blogs: blogId },
+      {
+        $pull: { blogs: blogId },
+        $inc: { "meta.total_blogs": -1 },
+      },
+      { session }
+    );
+
+    await Tag.updateMany(
+      { blogs: blogId },
+      {
+        $pull: { blogs: blogId },
+        $inc: { tag_used_count: -1 },
+      },
+      { session }
+    );
+
+    const deletedBlog = await Blog.findByIdAndDelete(blogId).session(session);
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    res
+      .status(200)
+      .json(ApiResponse.success(null, "blog deleted successfully"));
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     next(error);
   }
 };

@@ -2,9 +2,35 @@
 import { Box, Button, Divider, Typography } from "@mui/material";
 import { formatDate } from "../utils/formatDate";
 import { Link } from "react-router-dom";
+import { useDeleteBlogMutation } from "../redux/api/blogApiSlice";
+import { showNotification } from "../redux/slices/notificationSlice";
+import { useDispatch } from "react-redux";
 
 const ManageBlogCard = ({ blog }) => {
   console.log("blog_manage", blog);
+  const dispatch = useDispatch();
+  const [deleteBlog] = useDeleteBlogMutation();
+  const handleDelete = async (id) => {
+    const confirmDelete = window.confirm(
+      "are you sure you want to delete this blog"
+    );
+    if (confirmDelete) {
+      // alert(`alert ${id}`);
+      try {
+        const response = await deleteBlog(id).unwrap();
+        console.log(response);
+        dispatch(
+          showNotification({
+            open: true,
+            message: response.message,
+            severity: response.status,
+          })
+        );
+      } catch (error) {
+        console.log("error", error);
+      }
+    }
+  };
   return (
     <Box
       sx={{
@@ -45,7 +71,9 @@ const ManageBlogCard = ({ blog }) => {
           <Button component={Link} to={`/editor/${blog?.slug}`} color="primary">
             Edit
           </Button>
-          <Button color="error">Delete</Button>
+          <Button onClick={() => handleDelete(blog._id)} color="error">
+            Delete
+          </Button>
         </Box>
       </Box>
       <Box
