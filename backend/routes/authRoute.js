@@ -14,6 +14,8 @@ import {
   getUserByUsername,
   changePassword,
   updateProfile,
+  unfollowUser,
+  followUser,
   // addLikedPostField,
 } from "../controllers/authControllers.js";
 import passport from "passport";
@@ -36,6 +38,8 @@ router.post("/forgot-password", forgotPassword);
 router.post("/verify-reset-otp", verifyResetOTP);
 router.put("/reset-password", resetPassword);
 router.put("/change-password", isAuthenticated, changePassword);
+router.put("/follow/:userId", isAuthenticated , followUser);
+router.put("/unfollow/:userId", isAuthenticated , unfollowUser);
 
 router.get(
   "/google",

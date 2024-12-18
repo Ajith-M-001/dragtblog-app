@@ -6,6 +6,8 @@ const blogSlice = createSlice({
     currentBlog: null,
     isLiked: false,
     commentsWrapper: false,
+    isBookMarked: false,
+    isFollowing:false
   },
   reducers: {
     setCurrentBlog: (state, action) => {
@@ -20,11 +22,19 @@ const blogSlice = createSlice({
     setCommentsWrapper: (state, action) => {
       state.commentsWrapper = action.payload;
     },
+    setIsBookmarked: (state, action) => {
+      state.isBookMarked = action.payload;
+    },
+    setIsFollowing: (state, action) => {
+      state.isFollowing = action.payload;
+    },
   },
 });
 
 export const selectCurrentBlog = (state) => state.blog.currentBlog;
 export const selectIsLiked = (state) => state.blog.isLiked;
+export const selectIsBookmarked = (state) => state.blog.isBookMarked;
+export const selectIsFollowing = (state) => state.blog.isFollowing;
 export const selectCommentsWrapper = (state) => state.blog.commentsWrapper;
 
 export const {
@@ -32,5 +42,7 @@ export const {
   clearCurrentBlog,
   setIsLiked,
   setCommentsWrapper,
+  setIsBookmarked,
+  setIsFollowing,
 } = blogSlice.actions;
 export default blogSlice.reducer;

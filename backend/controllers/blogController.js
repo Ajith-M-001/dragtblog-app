@@ -352,7 +352,10 @@ export const getBlogBySlug = async (req, res, next) => {
       { slug },
       { $inc: { "blogActivity.total_views": incrementViews } },
       { new: true }
-    ).populate("author", "profilePicture fullName username likedBlogs");
+    ).populate(
+      "author",
+      "profilePicture fullName username likedBlogs followers"
+    );
 
     await User.findByIdAndUpdate(blog.author._id, {
       $inc: { "account_info.total_reads": incrementViews },
@@ -579,12 +582,17 @@ export const deleteBlog = async (req, res, next) => {
     await Comment.deleteMany({ blog: blogId }).session(session);
     await Notification.deleteMany({ relatedBlog: blogId }).session(session);
 
+     await User.updateMany(
+       { bookmarks: blogId },
+       { $pull: { bookmarks: blogId } }, // Remove blogId from bookmarks
+       { session }
+     );
+
     await User.updateMany(
       {},
       {
         $pull: {
           blogs: blogId,
-          bookmarks: blogId,
           publishedPosts: blogId,
         },
       },
@@ -618,6 +626,56 @@ export const deleteBlog = async (req, res, next) => {
     res
       .status(200)
       .json(ApiResponse.success(null, "blog deleted successfully"));
+  } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
+    next(error);
+  }
+};
+
+export const bookmarkBlog = async (req, res, next) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+  try {
+    const { slug } = req.params;
+    const userId = req.user._id;
+
+    const blog = await Blog.findOne({ slug });
+    if (!blog) {
+      return next(new ApiError("Blog not found", 404));
+    }
+
+    const alreadyBookmarked = blog.bookmarkedBy.includes(userId);
+    if (alreadyBookmarked) {
+      await Blog.findByIdAndUpdate(blog._id, {
+        $pull: { bookmarkedBy: userId },
+      });
+      await User.findByIdAndUpdate(userId, {
+        $pull: { bookmarks: blog._id },
+      });
+    } else {
+      await Blog.findByIdAndUpdate(blog._id, {
+        $push: { bookmarkedBy: userId },
+      });
+      await User.findByIdAndUpdate(userId, {
+        $push: { bookmarks: blog._id },
+      });
+    }
+
+    // Commit the transaction
+    await session.commitTransaction();
+    session.endSession();
+
+    res
+      .status(200)
+      .json(
+        ApiResponse.success(
+          null,
+          `Blog ${
+            alreadyBookmarked ? "unbookmarked" : "bookmarked"
+          } successfully`
+        )
+      );
   } catch (error) {
     await session.abortTransaction();
     session.endSession();

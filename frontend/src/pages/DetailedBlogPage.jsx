@@ -24,11 +24,15 @@ import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useRef, useState } from "react";
 import {
   selectCommentsWrapper,
+  selectCurrentBlog,
   setCommentsWrapper,
   setCurrentBlog,
+  setIsFollowing,
 } from "../redux/slices/blogSlice";
 import CommentsContainer from "../components/CommentsContainer";
 import { Drawer } from "@mui/material"; // Import Drawer
+import { useFollowUserMutation } from "../redux/api/userApiSlice";
+import { showNotification } from "../redux/slices/notificationSlice";
 
 const DetailedBlogPage = () => {
   const { slug } = useParams();
@@ -36,21 +40,27 @@ const DetailedBlogPage = () => {
   const dispatch = useDispatch();
   const [isLiked, setIsLiked] = useState(false);
   const [highlightedComment, setHighlightedComment] = useState(null);
+  const { userInfo } = useSelector((state) => state.user);
+  const  currentBlog  = useSelector(selectCurrentBlog);
+  console.log("curre099", currentBlog);
 
   const { data, isLoading } = useGetBlogBySlugQuery(slug);
+  const [followUser] = useFollowUserMutation();
 
   useEffect(() => {
     dispatch(setCurrentBlog(data?.data));
     dispatch(setCommentsWrapper(false));
-  }, [data, dispatch]);
+  }, [data, dispatch, currentBlog]);
 
   useEffect(() => {
     const hash = window.location.hash;
-    if (hash) {
+    const commentId = hash.replace("#commentId-", "");
+    if (commentId) {
+      console.log("commentId_123", commentId);
       dispatch(setCommentsWrapper(true));
-      setHighlightedComment(hash.replace("#commentId-", ""));
+      setHighlightedComment(commentId);
     }
-  }, [dispatch]);
+  }, [dispatch, highlightedComment]);
 
   console.log("hash_123", highlightedComment);
   const { data: similarBlogs, isLoading: similarBlogsLoading } =
@@ -60,6 +70,24 @@ const DetailedBlogPage = () => {
     });
 
   const commentsWrapper = useSelector(selectCommentsWrapper);
+
+  const handleFollow = async (id) => {
+    try {
+      const response = await followUser(id).unwrap();
+      dispatch(setIsFollowing());
+      dispatch(
+        showNotification({
+          open: true,
+          message: response.message,
+          severity: response.status,
+        })
+      );
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  console.log("data?.data?.author", data?.data?.author);
 
   return (
     <Container maxWidth="md" className="min-height">
@@ -160,14 +188,19 @@ const DetailedBlogPage = () => {
                     {data?.data?.author?.fullName}
                   </Typography>
 
-                  <Button
-                    variant="text"
-                    color="primary"
-                    size="small"
-                    sx={{ textTransform: "none", fontSize: "0.875rem" }} // Remove uppercase and adjust size
-                  >
-                    Follow
-                  </Button>
+                  {data?.data?.author?._id !== userInfo?._id ? (
+                    <Button
+                      onClick={() => handleFollow(data?.data?.author?._id)}
+                      variant="text"
+                      color="primary"
+                      size="small"
+                      sx={{ textTransform: "none", fontSize: "0.875rem" }} // Remove uppercase and adjust size
+                    >
+                      Follow
+                    </Button>
+                  ) : (
+                    ""
+                  )}
                 </Box>
                 <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
                   <Typography variant="subtitle1" sx={{ fontSize: "0.875rem" }}>
@@ -181,7 +214,11 @@ const DetailedBlogPage = () => {
             </Box>
             <Divider />
 
-            <BlogInteraction isLiked={isLiked} setIsLiked={setIsLiked} />
+            <BlogInteraction
+              slug={slug}
+              isLiked={isLiked}
+              setIsLiked={setIsLiked}
+            />
             <Divider />
 
             <BlogComponent />
@@ -200,7 +237,11 @@ const DetailedBlogPage = () => {
 
             <Divider />
 
-            <BlogInteraction isLiked={isLiked} setIsLiked={setIsLiked} />
+            <BlogInteraction
+              slug={slug}
+              isLiked={isLiked}
+              setIsLiked={setIsLiked}
+            />
 
             <Drawer
               anchor="right"

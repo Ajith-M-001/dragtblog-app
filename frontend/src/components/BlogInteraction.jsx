@@ -9,16 +9,22 @@ import { useDispatch, useSelector } from "react-redux";
 import {
   selectCommentsWrapper,
   selectCurrentBlog,
+  selectIsBookmarked,
   selectIsLiked,
   setCommentsWrapper,
+  setIsBookmarked,
   setIsLiked,
 } from "../redux/slices/blogSlice";
 import EditIcon from "@mui/icons-material/Edit";
 import { Link } from "react-router-dom";
-import { useLikeBlogMutation } from "../redux/api/blogApiSlice";
+import {
+  useBookmarkBlogMutation,
+  useLikeBlogMutation,
+} from "../redux/api/blogApiSlice";
 import { useEffect } from "react";
+import { showNotification } from "../redux/slices/notificationSlice";
 
-const BlogInteraction = () => {
+const BlogInteraction = ({ slug }) => {
   const currentBlog = useSelector(selectCurrentBlog);
   const { userInfo } = useSelector((state) => state.user);
   const likes = currentBlog?.blogActivity?.total_likes;
@@ -28,7 +34,9 @@ const BlogInteraction = () => {
   const authorId = userInfo?._id;
 
   const [likeBlog] = useLikeBlogMutation();
+  const [bookmarkblog] = useBookmarkBlogMutation();
   const isLiked = useSelector(selectIsLiked);
+  const isBookmarked = useSelector(selectIsBookmarked);
   const dispatch = useDispatch();
   const commentsWrapper = useSelector(selectCommentsWrapper);
 
@@ -37,8 +45,10 @@ const BlogInteraction = () => {
     console.log("current", currentBlog);
     if (currentBlog) {
       const userHasLiked = currentBlog.likedBy?.includes(userInfo?._id);
-      console.log("userHasLiked", userHasLiked);
+      const userHasBookmark = currentBlog.bookmarkedBy?.includes(userInfo?._id);
+      console.log("userHasBookmark", userHasBookmark);
       dispatch(setIsLiked(userHasLiked));
+      dispatch(setIsBookmarked(userHasBookmark));
     }
   }, [currentBlog]);
 
@@ -65,6 +75,22 @@ const BlogInteraction = () => {
     console.log("commentsWrapper", commentsWrapper);
   };
 
+  const handleBookmark = async (slug) => {
+    try {
+      const response = await bookmarkblog(slug).unwrap();
+      console.log("response", response);
+      dispatch(
+        showNotification({
+          open: true,
+          message: response.message,
+          severity: response.status,
+        })
+      );
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
   return (
     <Box sx={{ my: 2, display: "flex", justifyContent: "space-between" }}>
       <Box sx={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -89,8 +115,11 @@ const BlogInteraction = () => {
             </IconButton>
           </>
         ) : null}
-        <IconButton>
-          <BookmarkAddIcon />
+        <IconButton
+          onClick={() => handleBookmark(slug)}
+          sx={{ color: isBookmarked ? "primary.main" : "inherit" }} // Change color based on bookmark status
+        >
+          {isBookmarked ? <BookmarkRemoveIcon /> : <BookmarkAddIcon />}
         </IconButton>
         <IconButton>
           <MoreHorizIcon />

@@ -103,10 +103,10 @@ const CommentsContainer = () => {
         ) : (
           <Box>
             {allComments && allComments?.length > 0 ? (
-              allComments?.map((comment) => (
+              allComments?.map((comment, index) => (
                 <>
                   <CommentCard
-                    key={comment._id}
+                    key={index}
                     comment={comment}
                     slug={slug}
                   />

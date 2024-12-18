@@ -2,6 +2,7 @@ import Category from "../model/categorySchema.js";
 import ApiError from "../utils/ApiError.js";
 import ApiResponse from "../utils/ApiResponse.js";
 import slugify from "slugify";
+import User from "../model/userSchema.js";
 
 export const createCategory = async (req, res, next) => {
   try {
@@ -62,5 +63,59 @@ export const getByCategory = async (req, res, next) => {
       );
   } catch (error) {
     next(error);
+  }
+};
+
+export const followCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    const currentUserId = req.user._id;
+
+    // Add category to the followingCategories array
+    await User.findByIdAndUpdate(
+      currentUserId,
+      { $addToSet: { followingCategories: categoryId } },
+      { new: true }
+    );
+
+    // Add user to the followers array of the category
+    await Category.findByIdAndUpdate(
+      categoryId,
+      { $addToSet: { followers: currentUserId } },
+      { new: true }
+    );
+    res
+      .status(200)
+      .json(ApiResponse.success(null, "You are now following the category"));
+  } catch (error) {
+    res.status(500).json({ message: "Failed to follow category.", error });
+  }
+};
+
+
+export const unfollowCategory = async (req, res) => {
+  try {
+    const { categoryId } = req.params;
+    const currentUserId = req.user._id;
+
+    // Remove category from the followingCategories array
+    await User.findByIdAndUpdate(
+      currentUserId,
+      { $pull: { followingCategories: categoryId } },
+      { new: true }
+    );
+
+    // Remove user from the followers array of the category
+    await Category.findByIdAndUpdate(
+      categoryId,
+      { $pull: { followers: currentUserId } },
+      { new: true }
+    );
+
+    res
+      .status(200)
+      .json(ApiResponse.success(null, "You have unfollowed the category"));
+  } catch (error) {
+    res.status(500).json({ message: "Failed to unfollow category.", error });
   }
 };

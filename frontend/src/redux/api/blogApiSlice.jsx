@@ -111,6 +111,13 @@ const blogApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Blog"],
     }),
+    bookmarkBlog: builder.mutation({
+      query: (slug) => ({
+        url: `${BLOG_URL}/bookmarkBlog/${slug}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Blog"],
+    }),
   }),
 });
 
@@ -128,4 +135,5 @@ export const {
   useLikeBlogMutation,
   useUserWrittenBlogsQuery,
   useDeleteBlogMutation,
+  useBookmarkBlogMutation
 } = blogApiSlice;

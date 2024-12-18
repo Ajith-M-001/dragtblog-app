@@ -138,7 +138,7 @@ export const addComment = async (req, res, next) => {
               type: "comment",
               title: "New Comment on Your Blog",
               message: `${user.fullName} commented on your blog "${blog.title}"`,
-              link: `/blog/${blog.slug}`,
+              link: `/blog/${blog.slug}#commentId-${newComment._id}`, // Updated link
               relatedUser: user._id,
               relatedBlog: blog._id,
               relatedComment: newComment._id,

@@ -105,6 +105,22 @@ const userApiSlice = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    followUser: builder.mutation({
+      query: (userId) => ({
+        url: `${USER_URL}/follow/${userId}`,
+        method: "PUT",
+        credentials: "include",
+      }),
+      invalidatesTags: ["User"],
+    }),
+    unfollowUser: builder.mutation({
+      query: (userId) => ({
+        url: `${USER_URL}/unfollow/${userId}`,
+        method: "PUT",
+        credentials: "include",
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -122,4 +138,6 @@ export const {
   useGetUserByUsernameQuery,
   useChangePasswordMutation,
   useUpdateProfileMutation,
+  useFollowUserMutation,
+  useUnfollowUserMutation,
 } = userApiSlice;
