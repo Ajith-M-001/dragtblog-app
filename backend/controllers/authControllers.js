@@ -680,3 +680,84 @@ export const unfollowUser = async (req, res, next) => {
 //     next(new ApiError(500, "An error occurred during adding liked post field"));
 //   }
 // };
+
+
+
+
+// const toggleFollow = asyncHandler(async (req, res) => {
+//   const { userId: targetUserId } = req.params;
+//   const currentUserId = req.user._id;
+
+//   // Input validation
+//   if (!targetUserId) {
+//     throw new ApiError(400, "User ID is required");
+//   }
+
+//   if (!mongoose.Types.ObjectId.isValid(targetUserId)) {
+//     throw new ApiError(400, "Invalid user ID format");
+//   }
+
+//   if (currentUserId.toString() === targetUserId) {
+//     throw new ApiError(400, "You cannot follow/unfollow yourself");
+//   }
+
+//   // Check if target user exists
+//   const targetUser = await User.findById(targetUserId);
+//   if (!targetUser) {
+//     throw new ApiError(404, "User not found");
+//   }
+
+//   // Check current follow status
+//   const isAlreadyFollowing = await User.findOne({
+//     _id: currentUserId,
+//     following: targetUserId,
+//   });
+
+//   // Set up operation based on current status
+//   const operation = isAlreadyFollowing ? "$pull" : "$addToSet";
+//   const message = isAlreadyFollowing ? "unfollowed" : "followed";
+
+//   // Use transaction to ensure data consistency
+//   const session = await mongoose.startSession();
+//   try {
+//     session.startTransaction();
+
+//     const [updatedCurrentUser, updatedTargetUser] = await Promise.all([
+//       User.findByIdAndUpdate(
+//         currentUserId,
+//         { [operation]: { following: targetUserId } },
+//         { new: true, session }
+//       ),
+//       User.findByIdAndUpdate(
+//         targetUserId,
+//         { [operation]: { followers: currentUserId } },
+//         { new: true, session }
+//       ),
+//     ]);
+
+//     if (!updatedCurrentUser || !updatedTargetUser) {
+//       throw new ApiError(500, `Error while ${message} user`);
+//     }
+
+//     await session.commitTransaction();
+
+//     return res.status(200).json(
+//       new ApiResponse(
+//         200,
+//         {
+//           isFollowing: !isAlreadyFollowing,
+//           following: updatedCurrentUser.following.length,
+//           followers: updatedTargetUser.followers.length,
+//         },
+//         `Successfully ${message} user`
+//       )
+//     );
+//   } catch (error) {
+//     await session.abortTransaction();
+//     throw error;
+//   } finally {
+//     session.endSession();
+//   }
+// });
+
+// export { toggleFollow };

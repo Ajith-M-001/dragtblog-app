@@ -26,6 +26,20 @@ const categoryApiSlice = apiSlice.injectEndpoints({
       }),
       providesTags: ["Category"],
     }),
+    followCategory: builder.mutation({
+      query: (id) => ({
+        url: `${CATEGORY_URL}/followcategory/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Category"],
+    }),
+    unfollowCategory: builder.mutation({
+      query: (id) => ({
+        url: `${CATEGORY_URL}/unfollowcategory/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["Category"],
+    }),
   }),
 });
 
@@ -33,4 +47,6 @@ export const {
   useCreateCategoryMutation,
   useGetAllCategoriesQuery,
   useGetByCategoryQuery,
+  useFollowCategoryMutation,
+  useUnfollowCategoryMutation,
 } = categoryApiSlice;

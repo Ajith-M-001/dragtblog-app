@@ -25,13 +25,17 @@ import { useEffect, useRef, useState } from "react";
 import {
   selectCommentsWrapper,
   selectCurrentBlog,
+  selectIsFollowing,
   setCommentsWrapper,
   setCurrentBlog,
   setIsFollowing,
 } from "../redux/slices/blogSlice";
 import CommentsContainer from "../components/CommentsContainer";
 import { Drawer } from "@mui/material"; // Import Drawer
-import { useFollowUserMutation } from "../redux/api/userApiSlice";
+import {
+  useFollowUserMutation,
+  useUnfollowUserMutation,
+} from "../redux/api/userApiSlice";
 import { showNotification } from "../redux/slices/notificationSlice";
 
 const DetailedBlogPage = () => {
@@ -41,11 +45,22 @@ const DetailedBlogPage = () => {
   const [isLiked, setIsLiked] = useState(false);
   const [highlightedComment, setHighlightedComment] = useState(null);
   const { userInfo } = useSelector((state) => state.user);
-  const  currentBlog  = useSelector(selectCurrentBlog);
-  console.log("curre099", currentBlog);
+  const currentBlog = useSelector(selectCurrentBlog);
+  const isFollowing = useSelector(selectIsFollowing);
+  console.log("curre099", isFollowing);
 
   const { data, isLoading } = useGetBlogBySlugQuery(slug);
   const [followUser] = useFollowUserMutation();
+  const [unfollowUser] = useUnfollowUserMutation();
+
+  useEffect(() => {
+    if (data?.data?.author?.followers.includes(userInfo?._id)) {
+      // Added closing parenthesis
+      dispatch(setIsFollowing(true));
+    } else {
+      dispatch(setIsFollowing(false));
+    }
+  }, [data?.data, userInfo]);
 
   useEffect(() => {
     dispatch(setCurrentBlog(data?.data));
@@ -74,7 +89,9 @@ const DetailedBlogPage = () => {
   const handleFollow = async (id) => {
     try {
       const response = await followUser(id).unwrap();
-      dispatch(setIsFollowing());
+      if (response.status === "success") {
+        dispatch(setIsFollowing(true));
+      }
       dispatch(
         showNotification({
           open: true,
@@ -87,7 +104,25 @@ const DetailedBlogPage = () => {
     }
   };
 
-  console.log("data?.data?.author", data?.data?.author);
+  const handleunFollow = async (id) => {
+    try {
+      const response = await unfollowUser(id).unwrap();
+      if (response.status === "success") {
+        dispatch(setIsFollowing(false));
+      }
+      dispatch(
+        showNotification({
+          open: true,
+          message: response.message,
+          severity: response.status,
+        })
+      );
+    } catch (error) {
+      console.log("error", error);
+    }
+  };
+
+  console.log("data?.data?.author", data?.data);
 
   return (
     <Container maxWidth="md" className="min-height">
@@ -189,15 +224,27 @@ const DetailedBlogPage = () => {
                   </Typography>
 
                   {data?.data?.author?._id !== userInfo?._id ? (
-                    <Button
-                      onClick={() => handleFollow(data?.data?.author?._id)}
-                      variant="text"
-                      color="primary"
-                      size="small"
-                      sx={{ textTransform: "none", fontSize: "0.875rem" }} // Remove uppercase and adjust size
-                    >
-                      Follow
-                    </Button>
+                    !isFollowing ? ( // Use parentheses instead of curly braces
+                      <Button
+                        onClick={() => handleFollow(data?.data?.author?._id)}
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        sx={{ textTransform: "none", fontSize: "0.875rem" }} // Remove uppercase and adjust size
+                      >
+                        Follow
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={() => handleunFollow(data?.data?.author?._id)}
+                        variant="text"
+                        color="primary"
+                        size="small"
+                        sx={{ textTransform: "none", fontSize: "0.875rem" }} // Remove uppercase and adjust size
+                      >
+                        Unfollow
+                      </Button>
+                    )
                   ) : (
                     ""
                   )}
