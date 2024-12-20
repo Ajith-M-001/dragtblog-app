@@ -582,11 +582,11 @@ export const deleteBlog = async (req, res, next) => {
     await Comment.deleteMany({ blog: blogId }).session(session);
     await Notification.deleteMany({ relatedBlog: blogId }).session(session);
 
-     await User.updateMany(
-       { bookmarks: blogId },
-       { $pull: { bookmarks: blogId } }, // Remove blogId from bookmarks
-       { session }
-     );
+    await User.updateMany(
+      { bookmarks: blogId },
+      { $pull: { bookmarks: blogId } }, // Remove blogId from bookmarks
+      { session }
+    );
 
     await User.updateMany(
       {},
@@ -682,3 +682,259 @@ export const bookmarkBlog = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getMonthlyPerformanceTrends = async (req, res, next) => {
+  try {
+    const performanceData = await Blog.aggregate([
+      {
+        $group: {
+          _id: {
+            year: { $year: "$createdAt" }, // Extract year from the date
+            month: { $month: "$createdAt" }, // Extract month from the date
+          },
+          totalViews: { $sum: "$blogActivity.total_views" },
+          totalLikes: { $sum: "$blogActivity.total_likes" },
+          totalComments: { $sum: "$blogActivity.total_comments" },
+        },
+      },
+      {
+        $sort: { "_id.year": 1, "_id.month": 1 }, // Sort by year and month
+      },
+      {
+        $project: {
+          _id: 0, // Exclude the _id field
+          year: "$_id.year",
+          month: "$_id.month",
+          totalViews: 1,
+          totalLikes: 1,
+          totalComments: 1,
+        },
+      },
+    ]);
+
+    // Format data for a line chart (if needed)
+    const formattedData = performanceData.map((item) => ({
+      month: `${item.year}-${item.month.toString().padStart(2, "0")}`, // Format year-month
+      views: item.totalViews,
+      likes: item.totalLikes,
+      comments: item.totalComments,
+    }));
+
+    res
+      .status(200)
+      .json(
+        ApiResponse.success(
+          formattedData,
+          "Monthly performance trends fetched successfully"
+        )
+      );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// export const getMonthlyPerformanceTrends = async (req, res, next) => {
+//   try {
+//     const performanceData = await Blog.aggregate([
+//       {
+//         $group: {
+//           _id: {
+//             year: { $year: "$createdAt" },
+//             month: { $month: "$createdAt" },
+//           },
+//           totalViews: { $sum: "$blogActivity.total_views" },
+//           totalLikes: { $sum: "$blogActivity.total_likes" },
+//           totalComments: { $sum: "$blogActivity.total_comments" },
+//         },
+//       },
+//       {
+//         $sort: { "_id.year": 1, "_id.month": 1 }, // Sort by year and month
+//       },
+//       {
+//         $project: {
+//           _id: 0,
+//           year: "$_id.year",
+//           month: "$_id.month",
+//           totalViews: 1,
+//           totalLikes: 1,
+//           totalComments: 1,
+//         },
+//       },
+//     ]);
+
+//     // Prepare data for ECharts
+//     const months = performanceData.map(
+//       (item) => `${item.year}-${item.month.toString().padStart(2, "0")}`
+//     );
+//     const viewsData = performanceData.map((item) => item.totalViews);
+//     const likesData = performanceData.map((item) => item.totalLikes);
+//     const commentsData = performanceData.map((item) => item.totalComments);
+
+//     const chartData = {
+//       xAxis: {
+//         type: "category",
+//         data: months, // Labels for the X-axis (Months)
+//       },
+//       yAxis: {
+//         type: "value",
+//       },
+//       series: [
+//         {
+//           name: "Views",
+//           data: viewsData,
+//           type: "line",
+//           smooth: true,
+//         },
+//         {
+//           name: "Likes",
+//           data: likesData,
+//           type: "line",
+//           smooth: true,
+//         },
+//         {
+//           name: "Comments",
+//           data: commentsData,
+//           type: "line",
+//           smooth: true,
+//         },
+//       ],
+//     };
+
+//     res
+//       .status(200)
+//       .json(
+//         ApiResponse.success(
+//           chartData,
+//           "Monthly performance trends fetched successfully"
+//         )
+//       );
+//   } catch (error) {
+//     next(error);
+//   }
+// };
+
+// export const getPersonalizedBlogs = async (req, res, next) => {
+//   try {
+//     const userId = req.user._id;
+
+//     // Fetch user following data (following users, categories, and tags)
+//     const currentUser = await User.findById(userId).select(
+//       "following followingCategories followingTags"
+//     );
+
+//     if (!currentUser) {
+//       return res.status(404).json(ApiResponse.error("User not found", 404));
+//     }
+
+//     // Define match conditions based on user's following
+//     const matchConditions = {
+//       $or: [
+//         { author: { $in: currentUser.following } }, // Blogs from followed authors
+//         { category: { $in: currentUser.followingCategories } }, // Blogs from followed categories
+//         { tags: { $in: currentUser.followingTags } }, // Blogs with followed tags
+//       ],
+//       status: "published", // Ensure only published blogs are fetched
+//     };
+
+//     // Aggregate query for personalized blogs
+//     const personalizedBlogs = await Blog.aggregate([
+//       { $match: matchConditions },
+
+//       // Lookup author details
+//       {
+//         $lookup: {
+//           from: "users",
+//           localField: "author",
+//           foreignField: "_id",
+//           as: "authorDetails",
+//         },
+//       },
+//       { $unwind: "$authorDetails" }, // Unwind author array to object
+
+//       // Lookup category details
+//       {
+//         $lookup: {
+//           from: "categories",
+//           localField: "category",
+//           foreignField: "_id",
+//           as: "categoryDetails",
+//         },
+//       },
+//       { $unwind: "$categoryDetails" }, // Unwind category array to object
+
+//       // Lookup tag details
+//       {
+//         $lookup: {
+//           from: "tags",
+//           localField: "tags",
+//           foreignField: "_id",
+//           as: "tagDetails",
+//         },
+//       },
+
+//       // Add relevance score based on matching authors, categories, and tags
+//       {
+//         $addFields: {
+//           relevanceScore: {
+//             $sum: [
+//               {
+//                 $cond: [{ $in: ["$author", currentUser.following] }, 3, 0],
+//               }, // Higher score for followed authors
+//               {
+//                 $cond: [
+//                   { $in: ["$category", currentUser.followingCategories] },
+//                   2,
+//                   0,
+//                 ],
+//               }, // Medium score for followed categories
+//               {
+//                 $size: {
+//                   $setIntersection: ["$tags", currentUser.followingTags],
+//                 },
+//               }, // Base score for matching tags
+//             ],
+//           },
+//         },
+//       },
+
+//       // Sort by relevance score (descending) and created date (most recent first)
+//       { $sort: { relevanceScore: -1, createdAt: -1 } },
+
+//       // Project only the necessary fields
+//       {
+//         $project: {
+//           title: 1,
+//           content: 1,
+//           thumbnail: 1,
+//           createdAt: 1,
+//           relevanceScore: 1,
+//           "authorDetails._id": 1,
+//           "authorDetails.name": 1,
+//           "authorDetails.avatar": 1,
+//           "categoryDetails._id": 1,
+//           "categoryDetails.name": 1,
+//           tagDetails: 1,
+//         },
+//       },
+
+//       // Limit the number of results for pagination (e.g., 20 per page)
+//       { $limit: 20 },
+
+//       // Skip for pagination (optional)
+//       { $skip: parseInt(req.query.skip) || 0 },
+//     ]);
+
+//     // Return the personalized blogs
+//     res
+//       .status(200)
+//       .json(
+//         ApiResponse.success(
+//           personalizedBlogs,
+//           "Personalized blogs fetched successfully",
+//           200
+//         )
+//       );
+//   } catch (error) {
+//     next(error);
+//   }
+// };

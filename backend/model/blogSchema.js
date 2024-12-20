@@ -37,6 +37,9 @@ const blogSchema = new mongoose.Schema(
     scheduledDate: {
       type: Date,
     },
+
+    //tags should have been id ref to tags , to do aggrigate
+
     tags: [
       {
         type: String,
@@ -49,6 +52,8 @@ const blogSchema = new mongoose.Schema(
       type: [Schema.Types.ObjectId],
       ref: "Comment",
     },
+
+    //same categories should have been id ref to aggregate
     categories: {
       type: String,
       trim: true,

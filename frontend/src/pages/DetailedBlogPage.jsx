@@ -21,7 +21,7 @@ import BlogInteraction from "../components/BlogInteraction";
 import BlogCard from "../components/BlogCard";
 import NoDataFound from "../components/NoDataFound";
 import { useDispatch, useSelector } from "react-redux";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   selectCommentsWrapper,
   selectCurrentBlog,
